@@ -1,0 +1,5 @@
+*.pyc
+data/*
+!data/.gitignore
+log/
+.DS_Store
