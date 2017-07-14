@@ -132,7 +132,7 @@ var Scores = Backbone.View.extend({
 		var testtype=this.scatterPlot.testtype;
 		var graphtype=this.scatterPlot.graphtype;
 		var self=this;
-		$.getJSON('/topn/'+testtype+'/'+graphtype+"/"+result_id,
+		$.getJSON('topn/'+testtype+'/'+graphtype+"/"+result_id,
 			function(result){
 				//returns an object array that isnt evaluated
 				globaldata=result;
@@ -486,7 +486,7 @@ var SigSimSearchForm = Backbone.View.extend({
 	populateInputGenes: function(result_id){
 		// Populate <textarea> with input up/down genes retrieved from the DB
 		var self = this;
-		$.getJSON('/inputgenes/'+this.result_id, function(geneSet){
+		$.getJSON('inputgenes/'+this.result_id, function(geneSet){
 			self.populateGenes(geneSet); 
 		});
 	},

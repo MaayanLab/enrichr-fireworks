@@ -103,7 +103,7 @@ def get_all_sig_ids():
 		sig_ids = [rec['data']['name'] for rec in json_data]
 		return json.dumps({'sig_ids': sig_ids, 'n_sig_ids': len(sig_ids)})    
 #
-@app2.route('/<path:filename>')
+@app2.route(enter_point+'/<path:filename>')
 def send_file(filename):
     return send_from_directory(app2.static_folder,filename)
 
@@ -181,14 +181,14 @@ def result_page(result_id):
 		enter_point=enter_point,
 		result_id=result_id)
 
-@app2.route('/inputgenes/<string:result_id>',methods=['GET'])
+@app2.route(enter_point+'/inputgenes/<string:result_id>',methods=['GET'])
 def gene_page(result_id):
     result_obj=EnrichmentResult(result_id,'fishertest',0)
     result_genes=result_obj.get_genes()
     return result_genes.to_json(orient='values')    
 #    
 
-@app2.route('/topn/<string:testtype>/<string:graph>/<string:result_id>',methods=['GET'])
+@app2.route(enter_point+'/topn/<string:testtype>/<string:graph>/<string:result_id>',methods=['GET'])
 def topn_page(testtype,graph,result_id):
     graph=int(graph)
     topn=EnrichmentResult(result_id,testtype,graph)
