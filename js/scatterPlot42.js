@@ -280,6 +280,9 @@ var Scatter3dView = Backbone.View.extend({
 
 				//$("#controls2").remove();
 				//$("#legend").remove();
+		$("#renderer").remove();
+				//$("#controls1").remove();
+		$("#controls").remove();
 
 				self.setUpStage();
 				// self.colorBy(self.colorKey);
@@ -414,9 +417,7 @@ var Scatter3dView = Backbone.View.extend({
 		}
 	},
 	changeNetworkBy: function(key){
-		$("#renderer").remove();
-				//$("#controls1").remove();
-		$("#controls").remove();
+
 
 		this.networkKey=key;
 		var searchid=sigSimSearch.result_id;
