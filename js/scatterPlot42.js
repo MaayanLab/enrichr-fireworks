@@ -433,7 +433,6 @@ var Scatter3dView = Backbone.View.extend({
 	},
 	changeNetworkBy: function(key){
 		$("#renderer").remove();
-				//$("#controls1").remove();
 		$("#controls").remove();
 
 		this.networkKey=key;
@@ -454,6 +453,8 @@ var Scatter3dView = Backbone.View.extend({
 	},
 
 	changeTestBy: function(key){
+		$("#renderer").remove();
+		$("#controls").remove();		
 		var searchid=sigSimSearch.result_id;		
 		this.testkey=key;
 		this.testtype=this.testkey;

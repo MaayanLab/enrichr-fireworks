@@ -239,53 +239,53 @@ var Controler = Backbone.View.extend({
 
 
 		// Shapes: 
-		var shapeControl = this.el.append('div')
-			.attr('class', 'form-group');
-		shapeControl.append('label')
-			.attr('class', 'control-label')
-			.text('Shape by:');
+		// var shapeControl = this.el.append('div')
+		// 	.attr('class', 'form-group');
+		// shapeControl.append('label')
+		// 	.attr('class', 'control-label')
+		// 	.text('Shape by:');
 
-		var shapeSelect = shapeControl.append('select')
-			.attr('id', 'shape')
-			.attr('class', 'form-control')
-			.on('change', function(){
-				var selectedMetaKey = d3.select('#shape').property('value');
-				self.trigger('shapeChanged', selectedMetaKey)
-			});
+		// var shapeSelect = shapeControl.append('select')
+		// 	.attr('id', 'shape')
+		// 	.attr('class', 'form-control')
+		// 	.on('change', function(){
+		// 		var selectedMetaKey = d3.select('#shape').property('value');
+		// 		self.trigger('shapeChanged', selectedMetaKey)
+		// 	});
 
-		var shapeOptions = shapeSelect
-			.selectAll('option')
-			.data(['library']).enter()
-			//.data(_.pluck(metas, 'name')).enter()
-			.append('option')
-			.text(function(d){return d;})
-			.attr('value', function(d){return d;});
+		// var shapeOptions = shapeSelect
+		// 	.selectAll('option')
+		// 	.data(['library']).enter()
+		// 	//.data(_.pluck(metas, 'name')).enter()
+		// 	.append('option')
+		// 	.text(function(d){return d;})
+		// 	.attr('value', function(d){return d;});
 
 		// Colors
-		var colorControl = this.el.append('div')
-			.attr('class', 'form-group')
-		colorControl.append('label')
-			.attr('class', 'control-label')
-			.text('Color by:');
+		// var colorControl = this.el.append('div')
+		// 	.attr('class', 'form-group')
+		// colorControl.append('label')
+		// 	.attr('class', 'control-label')
+		// 	.text('Color by:');
 
-		var colorSelect = colorControl.append('select')
-			.attr('id', 'color')
-			.attr('class', 'form-control')
-			.on('change', function(){
-				var selectedMetaKey = d3.select('#color').property('value');
-				self.trigger('colorChanged', selectedMetaKey)
-			});
-		var colormetas=_.pluck(metas,'name');
-		colormetas.splice(0,1);
-		colormetas.splice(1,1);
+		// var colorSelect = colorControl.append('select')
+		// 	.attr('id', 'color')
+		// 	.attr('class', 'form-control')
+		// 	.on('change', function(){
+		// 		var selectedMetaKey = d3.select('#color').property('value');
+		// 		self.trigger('colorChanged', selectedMetaKey)
+		// 	});
+		// var colormetas=_.pluck(metas,'name');
+		// colormetas.splice(0,1);
+		// colormetas.splice(1,1);
 
-		var colorOptions = colorSelect
-			.selectAll('option')
-			.data(colormetas).enter()
-			//.data(_.pluck(metas, 'name')).enter()
-			.append('option')
-			.text(function(d){return d;})
-			.attr('value', function(d){return d;});
+		// var colorOptions = colorSelect
+		// 	.selectAll('option')
+		// 	.data(colormetas).enter()
+		// 	//.data(_.pluck(metas, 'name')).enter()
+		// 	.append('option')
+		// 	.text(function(d){return d;})
+		// 	.attr('value', function(d){return d;});
         
         
        var networkControl=this.el.append('div')
