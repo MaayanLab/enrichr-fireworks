@@ -5,6 +5,7 @@ var textures = new Textures()
 var sd = new ScatterData({
 	resultid: result_id,
 	url: 'result/fishertest/0/' + result_id,
+	textures: textures,
 })
 
 var sdv = new Scatter3dView({

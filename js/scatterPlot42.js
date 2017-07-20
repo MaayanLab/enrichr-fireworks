@@ -177,10 +177,11 @@ var ScatterData = Backbone.Model.extend({
 		metas: [], // store information about meta [{name: 'metaKey', nUnique: nUnique, type: type}]
 		data: [], // store data
 		resultid: null,
+		textures: null,
 	},
 
 	url: function(){
-		return this.attributes.url// + '?n=' + this.n;
+		return this.attributes.url
 	},
 
 	parse: function(response){
@@ -208,7 +209,19 @@ var ScatterData = Backbone.Model.extend({
 		_.defaults(options, this.defaults)
 		_.defaults(this, options)
 		// fetch json data from server
-		this.fetch();
+		//this.fetch();
+		 this.listenToOnce(this.textures, 'allLoaded', function(){
+		  	//this.fetch();
+		 	//this.setAttr('url',this.url);
+		 	this.fetch();
+				 });
+		 // this.listenToOnce(this.resultid,function(){
+		 // 	this.fetch();
+		 // });
+		
+
+
+
 	},
 
 	groupBy: function(metaKey){
@@ -274,18 +287,20 @@ var Scatter3dView = Backbone.View.extend({
 
 		// self.setUpStage();
 		this.listenToOnce(this.textures, 'allLoaded', function(){
+				if(this.model.resultid){
+					this.listenToOnce(self.model,'sync', function(){
+						console.log('rmv');
+						$("#renderer").remove();
+						$("#controls").remove();});
+				}
 
 			self.listenTo(self.model, 'sync', function(){
 				console.log('model synced')
 
-				//$("#controls2").remove();
-				//$("#legend").remove();
-		$("#renderer").remove();
-				//$("#controls1").remove();
-		$("#controls").remove();
+		// $("#renderer").remove();
+		// $("#controls").remove();
 
 				self.setUpStage();
-				// self.colorBy(self.colorKey);
 				self.shapeBy(self.shapeKey);
 
 			});
@@ -417,7 +432,9 @@ var Scatter3dView = Backbone.View.extend({
 		}
 	},
 	changeNetworkBy: function(key){
-
+		$("#renderer").remove();
+				//$("#controls1").remove();
+		$("#controls").remove();
 
 		this.networkKey=key;
 		var searchid=sigSimSearch.result_id;

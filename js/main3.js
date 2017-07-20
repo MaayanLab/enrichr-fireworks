@@ -3,8 +3,10 @@ var textures = new Textures()
 
 var sd = new ScatterData({
 
-	url: 'graph/0'
+	url: 'graph/0',
+	textures: textures,
 })
+
 
 var sdv = new Scatter3dView({
 	model: sd,
@@ -16,7 +18,6 @@ var sdv = new Scatter3dView({
 	shapeKey: 'library',
 	labelKey: ['geneset','library'],
 })
-
 var legend = new Legend({scatterPlot: sdv, h: window.innerHeight})
 //make div tag separate for both control functions
 

@@ -67,32 +67,13 @@ def index_page():
         enter_point=enter_point,
         result_id='hello')  
 
-@app2.route(enter_point + '/graph/0', methods=['GET'])
-def load_graph_layout_coords():
+@app2.route(enter_point + '/graph/<string:graph>', methods=['GET'])
+def load_graph_layout_coords(graph):
 	if request.method == 'GET':
-		print graph_df_list[0].shape
-		return graph_df_list[0].reset_index().to_json(orient='records')
+		index=int(graph)
+		print graph_df_list[index].shape
+		return graph_df_list[index].reset_index().to_json(orient='records')
     
-@app2.route(enter_point + '/graph/1', methods=['GET'])
-def load_graph_layout_coords2():
-	if request.method == 'GET':
-       
-		graph_test=graph_df_list[1]
-		print graph_test.shape
-		return graph_test.reset_index().to_json(orient='records')
-@app2.route(enter_point+'/graph/2',methods=['GET'])
-def load_graph_layout_coords3():
-    if request.method=='GET':
-        graph_test=graph_df_list[2]
-        print graph_test.shape
-        return graph_test.reset_index().to_json(orient='records')
-
-@app2.route(enter_point+'/graph/3',methods=['GET'])
-def load_graph_layout_coords4():
-    if request.method=='GET':
-        graph_test=graph_df_list[3]
-        print graph_test.shape
-        return graph_test.reset_index().to_json(orient='records')
 
 @app2.route(enter_point + '/sig_ids', methods=['GET'])
 def get_all_sig_ids():
