@@ -191,7 +191,7 @@ def result_download(result_id):
     		'geneset': graph_df['geneset'],
     		'library': graph_df['library'],
     		}, index=graph_df.index)\
-    		.sort_values('similarity_scores', ascending=False)
+    		.sort_values('similarity_scores', ascending=True)
 	# Write into memory
     	result_df[i].to_csv(s,mode='a')
 	# Prepare response

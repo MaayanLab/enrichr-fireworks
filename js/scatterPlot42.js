@@ -691,7 +691,7 @@ var Scatter3dView = Backbone.View.extend({
 			for (var i=0;i<uniqueCats2.length;i++){
 				colorScale[i]=d3.scale.pow()
 				//changed from 0 to 3 to make enriched terms more apparent 
-				.domain([colorExtent[0],3,colorExtent[1]])
+				.domain([colorExtent[1],.05,colorExtent[0]])
 				.range(["#ddd",intermediaterange[i],fullrange[i]]);
 			}
 			var colorScaleBasic=d3.scale.ordinal().domain(uniqueCats2).range(fullrange);

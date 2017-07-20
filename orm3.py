@@ -13,6 +13,7 @@ from sklearn.preprocessing import MinMaxScaler
 from fisher import pvalue
 from bson.objectid import ObjectId
 from pymongo import MongoClient
+from decimal import Decimal
 
 client=MongoClient('mongodb://146.203.54.131:27017/')
 #client=MongoClient('localhost',27017)
@@ -72,17 +73,25 @@ class EnrichmentResult(object):
 		df_=df_.drop('y',1)
 		df_=df_.drop('z',1)
 		df_=df_.drop('geneset2',1)
-		self.topn=[i.encode('UTF8') for i in self.topn]
-		self.topn=map(int,self.topn)
-		df_=df_.iloc[self.topn]
-		df_=df_.sort_values(['score'],ascending=False)
+		#df_.index = np.arange(1, len(df_) + 1)
+#		self.topn=[i.encode('UTF8') for i in self.topn]
+#		self.topn=map(int,self.topn)
+#		self.topn=[i+1 for i in self.topn]
+#		df_=df_.iloc[self.topn]
+		df_=df_.loc[df_.score<.05]
+		df_=df_.loc[df_.score>0]
+#		df_=df_.sort_values(['score'],ascending=True)
 		values=df_['library'].unique().tolist()
 		for i in values:			
 			df2=df_.loc[df_.library==i]
-			if(len(df2.index)>5):
-				df2=df2[:5]
+			df2=df2.sort_values(['score'])
+			if(len(df2.index)>3):
+				df2=df2[:3]
 			if(len(df2.index)>0):
+				df2['score']=df2['score'].apply(lambda x:"{0:.4E}".format(Decimal(x)))
+				#df2.score.replace("{0:.4E}".format(Decimal(df2['score'])))
 				topndf=topndf.append(df2)
+				
 		cols=topndf.columns.tolist()			
 ##		cols=cols[-2:-1]+cols[:-1]+cols[-1:]
 		topndf=topndf[cols]	
@@ -119,16 +128,16 @@ class UserInput(object):
 			fisherresponse=fisherresponse.fishertest(genesetlist[i])
           #fisherresponse is now a list, create own sigid col
 			result=pd.DataFrame({'score':fisherresponse})
-			result['score']=-np.log10(result['score']+1e-4)
+			result['score']=result['score']
 			result['sig_id']=range(1,len(fisherresponse)+1)
-			result2=result.sort_values(['score'],ascending=False)
-			print(result)
+			result2=result.loc[result.score<.05] 
 			print(result2)
-			topn=result2.iloc[:100]
+			result2=result2.sort_values(['score'],ascending=True)
+          # change topn value to include everything with p value smaller than .05  
+			topn=result2 #.iloc[:100]
 			topn['sig_id']=topn['sig_id'].astype(str)
 			#topn=dict(zip(str(topn['sig_id']),topn['score']))
 			#topn=topn.values.tolist()
-			print(topn)
 #			result=result.sort_values(['sig_id'])
 
 
@@ -143,9 +152,9 @@ class UserInput(object):
 			otherresponse=Other(self.data)
 			otherresponse=otherresponse.othertest(genesetlist[i])
 			result=pd.DataFrame({'score':otherresponse})
-			result['score']=-np.log10(result['score']+1e-4)
+			result['score']=(result['score'])
 			result['sig_id']=range(1,len(otherresponse)+1)
-			result2=result.sort_values(['score'],ascending=False)
+			result2=result.sort_values(['score'],ascending=True)
 			topn=result2.iloc[:100]
 			topn['sig_id']=topn['sig_id'].astype(str)
             
