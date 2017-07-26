@@ -266,8 +266,7 @@ var Scatter3dView = Backbone.View.extend({
 		labelKey: ['geneset','library'], // which metaKey to use as labels
 		colorKey: 'library', // which metaKey to use as colors
 		shapeKey: 'library',
-		//networkKey:'Diseases',
-		//testKey:'fishertest',
+		networkKey:'Diseases and Drugs',
 		clouds: [], // to store Scatter3dCloud objects
 		textures: null, // the Textures collection instance
 		pointSize: 0.01, // the size of the points
@@ -275,6 +274,7 @@ var Scatter3dView = Backbone.View.extend({
 		is3d: true, // 3d or 2d
 		testtype: 'fishertest',
 		graphtype:0,
+		testkey:'Fisher Test'
 	},
 
 	initialize: function(options){
@@ -283,23 +283,18 @@ var Scatter3dView = Backbone.View.extend({
 		_.defaults(this, options)
 
 		var self = this;
-		// self.shapeBy(self.shapeKey);
 
-		// self.setUpStage();
 		this.listenToOnce(this.textures, 'allLoaded', function(){
+			//if a list of genes is being enriched, remove the previous view
 				if(this.model.resultid){
 					this.listenToOnce(self.model,'sync', function(){
 						console.log('rmv');
 						$("#renderer").remove();
-						$("#controls").remove();});
+					});
 				}
-
+			//if the data in the model changes, rerender plot
 			self.listenTo(self.model, 'sync', function(){
 				console.log('model synced')
-
-		// $("#renderer").remove();
-		// $("#controls").remove();
-
 				self.setUpStage();
 				self.shapeBy(self.shapeKey);
 
@@ -433,15 +428,13 @@ var Scatter3dView = Backbone.View.extend({
 	},
 	changeNetworkBy: function(key){
 		$("#renderer").remove();
-		$("#controls").remove();
-
 		this.networkKey=key;
 		var searchid=sigSimSearch.result_id;
-		if(key.localeCompare('Diseases')==0)
+		if(key.localeCompare('Diseases and Drugs')==0)
 			this.graphtype=0;
-		if(key.localeCompare('TranscriptionFactor')==0)
+		if(key.localeCompare('Transcription')==0)
 			this.graphtype=1;
-		if(key.localeCompare('CellType')==0)
+		if(key.localeCompare('Cell Type')==0)
 			this.graphtype=2;
 		if(key.localeCompare('Ontology')==0)
 			this.graphtype=3;
@@ -454,10 +447,12 @@ var Scatter3dView = Backbone.View.extend({
 
 	changeTestBy: function(key){
 		$("#renderer").remove();
-		$("#controls").remove();		
-		var searchid=sigSimSearch.result_id;		
+		var searchid=sigSimSearch.result_id;	
+		if(key.localeCompare('Fisher Test')==0)
+			this.testtype='fishertest';
+		if(key.localeCompare('Chi Square')==0)
+			this.testtype='othertest';	
 		this.testkey=key;
-		this.testtype=this.testkey;
 		this.model.set('url','result/'+this.testtype+'/'+this.graphtype+'/'+searchid);
 		this.model.fetch();
 	},
@@ -484,6 +479,7 @@ var Scatter3dView = Backbone.View.extend({
 		var symbolTypeScale = d3.scale.ordinal()
 			.domain(Object.keys(scatterDataSubsets))
 			.range(["circle"]);
+			//when you want the option to shape by metadata
 			//.range(textures.pluck('symbolType'));
 		
 		for (var key in scatterDataSubsets){

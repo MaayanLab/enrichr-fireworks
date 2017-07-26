@@ -19,7 +19,6 @@ var sdv = new Scatter3dView({
 	labelKey: ['geneset','library'],
 })
 var legend = new Legend({scatterPlot: sdv, h: window.innerHeight})
-//make div tag separate for both control functions
 
 var controler = new Controler({scatterPlot: sdv, h: window.innerHeight-200, w: 200})
 

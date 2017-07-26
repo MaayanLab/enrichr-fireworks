@@ -136,7 +136,6 @@ var Scores = Backbone.View.extend({
 			function(result){
 				//returns an object array that isnt evaluated
 				globaldata=result;
-				console.log(globaldata);
 				(self.tabulate());
 		});
 			
@@ -146,12 +145,13 @@ var Scores = Backbone.View.extend({
 	tabulate: function(data){
 		var data=globaldata;
 		columns=['geneset','library','score']
+		columns2=['geneset','library','p-value']
  		var table = d3.select(this.container).append('table').attr("id","table");
  		var thead = table.append('thead');
  		var tbody=table.append('tbody');
  		thead.append('tr')
  			.selectAll('th')
- 			.data(columns).enter()
+ 			.data(columns2).enter()
  			.append('th')
  			.text(function (column){return column;});
  		var rows = tbody.selectAll('tr')
@@ -167,7 +167,6 @@ var Scores = Backbone.View.extend({
  			.enter()
  			.append('td')
  				.text(function (d){return d.value;});
- 		console.log(table);
  		return table;
  	},
 
@@ -193,7 +192,7 @@ var Controler = Backbone.View.extend({
 
 		this.model = this.scatterPlot.model;
 
-		this.listenTo(this.model, 'sync',this.render)
+		this.listenToOnce(this.model, 'sync',this.render)
 
 		var scatterPlot = this.scatterPlot;
 
@@ -302,12 +301,12 @@ var Controler = Backbone.View.extend({
            });                
         var networkOptions=networkSelect
            .selectAll('option')
-           .data(['Diseases','TranscriptionFactor','CellType','Ontology']).enter()
+           .data(['Diseases and Drugs','Transcription','Cell Type','Ontology']).enter()
            .append('option')
            .text(function(d){return d;})
            .attr('value',function(d){return d;});
 
-        if(result_id){
+        if(this.model.resultid){
         	var testControl=this.el.append('div')
         		.attr('class','form-group')
         		testControl.append('label')
@@ -322,9 +321,11 @@ var Controler = Backbone.View.extend({
         		});
         	var testOptions=testSelect
         		.selectAll('option')
-        		.data(['fishertest','othertest']).enter()
+        		.data(['Fisher Test','Chi Square']).enter()
         		.append('option')
-        		.text(function(d){return d;});
+        		.text(function(d){return d;})
+        		//is the attr needed?
+        		.attr('value',function(d){return d;});
         }
  
 		return this;
@@ -335,7 +336,8 @@ var Controler = Backbone.View.extend({
 		$('#shape').val(this.scatterPlot.shapeKey); 
 		$('#color').val(this.scatterPlot.colorKey);
 		$('#network').val(this.scatterPlot.networkKey);
-		if(result_id){
+		if(this.model.resultid){
+			console.log('changetesttypecalled');
 			$('#test').val(this.scatterPlot.testKey);
 		}
 	},
