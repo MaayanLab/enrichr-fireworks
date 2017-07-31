@@ -18,8 +18,8 @@ import pandas as pd
 
 from flask import Flask, request, redirect, render_template, send_from_directory, abort, Response
 enter_point='/enrichr-fireworks' 
-allcyjs=np.array(["diseases_adjmat.txt.gml.cyjs","transcriptionfactors_adjmat.txt.gml.cyjs","celltypes_adjmat.txt.gml.cyjs","ontologies_adjmatfixed.txt.gml.cyjs"])
-allmetadata=np.array(["disall1.txt","tfalltry1.txt","celltypeall1.txt","ontologyall1.txt"])
+allcyjs=np.array(["diseases_adjmat.txt.gml.cyjs","TFnewlib.gml.cyjs","celltype(noknn&nothresh25)small.gml.cyjs","ontologies_adjmatfixed.txt.gml.cyjs","pathwaynewmethod.gml.cyjs"])
+allmetadata=np.array(["disall1.txt","tfnewlibmeta2.txt","celltype(noknn&nothresh25)names.txt","ontologyall1.txt","pathwaynewmethodnames.txt"])
 app2 = Flask(__name__, static_url_path=enter_point, static_folder=os.getcwd())
 
 app2.config['SEND_FILE_MAX_AGE_DEFAULT'] = 6
@@ -45,7 +45,7 @@ def load_globals2():
         graph_df_list.append(load_graph(cyjslist[i],metadatalist[i]))
 
 # taken from https://stackoverflow.com/questions/17714571/creating-a-dictionary-from-a-txt-file-using-python   
-    genelistnames={1:'TFgeneset.txt',2:'CellTypegeneset.txt',3:'Ontologygeneset.txt',0:'Diseasesgeneset.txt'}
+    genelistnames={1:'TFnewlibgeneset.txt',2:'celltype(noknn&nothresh25)genes.txt',3:'Ontologygeneset.txt',0:'Diseasesgeneset.txt',4:'pathwaynewmethodgenes.txt'}
     #genelistnames={0:'Diseasesgeneset.txt',1:'TFgeneset.txt',2:'CellTypegeneset.txt'}
     genesetlist={}
     #each key in genesetlist corresponds to a list(of all genesets) of lists(of genes)
@@ -89,9 +89,6 @@ def send_file(filename):
     return send_from_directory(app2.static_folder,filename)
 
 
-#should we have it that fisher is always called first? that way we know to 
-#build onto the database for other enrichments instead of overwriting
-#or there might be anpther way to check if current db is being used
 
 @app2.route(enter_point + '/search', methods=['POST'])
 def post_to_sigine():
@@ -102,8 +99,6 @@ def post_to_sigine():
 		gene_sets = GeneSets(up_genes)
 		fisherresult = gene_sets.enrich(genesetlist)
 		otherresult = gene_sets.enrichother(genesetlist)
-		#Res['result']=gene_sets.saveoffline()#new function that saves as dataframe only, for offline use
-		#return redirect(enter_point+'/result/offline')
 		rid = gene_sets.save()
 		print rid
 		return redirect(enter_point + '/result/' + rid, code=302)
@@ -117,19 +112,7 @@ def post_to_sigine():
 #        #rid=gene_sets.saveanother()  #saves into same db as other
 #        rid=gene_sets.save()
 #        return redirect(enter_point+'/result/'+rid, code=302)
-    
-@app2.route(enter_point+'/result/offline',methods=['GET'])
-def resultoffline():
-	index=0
 
-	graph_df=graph_df_list[index]  
-
-	# retrieve enrichment results from db
-	result_obj = EnrichmentResultOffline(Res,index)
-	# bind enrichment result to the network layout
-	graph_df_res = result_obj.bind_to_graph(graph_df)
-	print graph_df_res
-	return graph_df_res.reset_index().to_json(orient='records')
 
 
 

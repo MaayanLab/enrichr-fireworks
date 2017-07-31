@@ -20,7 +20,7 @@ var sdv = new Scatter3dView({
 })
 var legend = new Legend({scatterPlot: sdv, h: window.innerHeight})
 
-var controler = new Controler({scatterPlot: sdv, h: window.innerHeight-200, w: 200})
+var controler = new Controler({scatterPlot: sdv, h: window.innerHeight-800, w: 200})
 
 //var search = new SearchSelectize({scatterPlot: sdv, container: "#controls"})
 

@@ -438,6 +438,8 @@ var Scatter3dView = Backbone.View.extend({
 			this.graphtype=2;
 		if(key.localeCompare('Ontology')==0)
 			this.graphtype=3;
+		if(key.localeCompare('Pathway')==0)
+			this.graphtype=4;
 		if(searchid)
 		 	this.model.set('url','result/'+this.testtype+'/'+this.graphtype+'/'+searchid);
 	  		else

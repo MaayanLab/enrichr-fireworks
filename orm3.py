@@ -14,6 +14,7 @@ from fisher import pvalue
 from bson.objectid import ObjectId
 from pymongo import MongoClient
 from decimal import Decimal
+from scipy.stats import chi2_contingency
 
 client=MongoClient('mongodb://146.203.54.131:27017/')
 #client=MongoClient('localhost',27017)
@@ -72,7 +73,8 @@ class EnrichmentResult(object):
 		df_=df_.drop('x',1)
 		df_=df_.drop('y',1)
 		df_=df_.drop('z',1)
-		df_=df_.drop('geneset2',1)
+		if 'geneset2' in df_.columns:
+			df_=df_.drop('geneset2',1)           
 		#df_.index = np.arange(1, len(df_) + 1)
 #		self.topn=[i.encode('UTF8') for i in self.topn]
 #		self.topn=map(int,self.topn)
@@ -85,29 +87,17 @@ class EnrichmentResult(object):
 		for i in values:			
 			df2=df_.loc[df_.library==i]
 			df2=df2.sort_values(['score'])
+          #only show top three scores from each library  
 			if(len(df2.index)>3):
 				df2=df2[:3]
 			if(len(df2.index)>0):
 				df2['score']=df2['score'].apply(lambda x:"{0:.4E}".format(Decimal(x)))
-				#df2.score.replace("{0:.4E}".format(Decimal(df2['score'])))
 				topndf=topndf.append(df2)
 				
 		cols=topndf.columns.tolist()			
-##		cols=cols[-2:-1]+cols[:-1]+cols[-1:]
 		topndf=topndf[cols]	
 		return topndf    
        
-
-class EnrichmentResultOffline(object):
-    def __init__(self,res,graph):
-		self.result=res['result'].loc(graph)
-    
-    def bind_to_graph(self,df):
-		df_=df.copy()
-		df_['score'] = self.result
-		return df_        
-
-
 
 class UserInput(object):
 	"""The base class for GeneSets and Signature"""
@@ -220,8 +210,17 @@ class Other(object):
 		pvalues=[]
 		for k in genesets:
 			#find pvalues here
-			p=1.0
+			intersection=(len(self.data&set(k)))
+			user=len(self.data)
+			genelist=(len(k))
+			total=25000
+			if intersection==0:
+				pval=1
+			else:
+				chi,pval,d,exp=chi2_contingency([[intersection, genelist-intersection],[genelist,total-genelist]])                    
+			p=pval
 			pvalues.append(p)
+		print(pvalues)            
 		return pvalues
 
 class GeneSets(UserInput):

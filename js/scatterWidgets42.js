@@ -76,13 +76,10 @@ var Legend = Backbone.View.extend({
 			.cells(5)
 			.scale(colorscale);
 			//.scale(scatterPlot.colorScale);
-		//var legendScores = d3.legend.
 
 
 		this.g.select("#legendColor")
 			.call(legendColor);
-		// this.g.select("#topn")
-		// 	.call(function(d){getTopN();});
 
 		return this;
 	},
@@ -94,7 +91,7 @@ var Scores = Backbone.View.extend({
 		container: document.body,
 		scatterPlot: Scatter3dView,
 		w: 300,
-		h: 800,
+		h: 500,
 		// testtype:null,
 		// graphtype:null,
 		// result_id:null,
@@ -301,7 +298,7 @@ var Controler = Backbone.View.extend({
            });                
         var networkOptions=networkSelect
            .selectAll('option')
-           .data(['Diseases and Drugs','Transcription','Cell Type','Ontology']).enter()
+           .data(['Diseases and Drugs','Transcription','Cell Type','Ontology','Pathway']).enter()
            .append('option')
            .text(function(d){return d;})
            .attr('value',function(d){return d;});
@@ -338,7 +335,7 @@ var Controler = Backbone.View.extend({
 		$('#network').val(this.scatterPlot.networkKey);
 		if(this.model.resultid){
 			console.log('changetesttypecalled');
-			$('#test').val(this.scatterPlot.testKey);
+			$('#test').value(this.scatterPlot.testKey);
 		}
 	},
 
