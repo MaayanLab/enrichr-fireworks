@@ -4,7 +4,7 @@ var textures = new Textures()
 //changed /graph/ to number corresponding to correct category, the int will change with toggle
 var sd = new ScatterData({
 	resultid: result_id,
-	url: 'result/fishertest/0/' + result_id,
+	url: 'result/fishertest/0/cy/' + result_id,
 	textures: textures,
 })
 
@@ -18,6 +18,7 @@ var sdv = new Scatter3dView({
 	shapeKey: 'library',
 	labelKey:['geneset','library','score'],
 	testtype:'fishertest',
+	layouttype: 'cy',
 })
 
 var overlay = new Overlay({scatterPlot: sdv})

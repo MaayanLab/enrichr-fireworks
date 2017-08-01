@@ -3,7 +3,7 @@ var textures = new Textures()
 
 var sd = new ScatterData({
 
-	url: 'graph/0',
+	url: 'graph/0/cy',
 	textures: textures,
 })
 

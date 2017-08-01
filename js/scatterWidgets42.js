@@ -209,7 +209,13 @@ var Controler = Backbone.View.extend({
        });     
 
        this.listenTo(scatterPlot,'networkChanged',this.changeSelection);
+    
+       scatterPlot.listenTo(this,'layoutChanged',function(selectedMetaKey){
+          scatterPlot.changeLayoutBy(selectedMetaKey)
+       });     
 
+       this.listenTo(scatterPlot,'layoutChanged',this.changeSelection);
+       
        scatterPlot.listenTo(this,'testChanged', function(selectedMetaKey){
        		scatterPlot.changeTestBy(selectedMetaKey);
        });
@@ -303,6 +309,25 @@ var Controler = Backbone.View.extend({
            .text(function(d){return d;})
            .attr('value',function(d){return d;});
 
+       var layoutControl=this.el.append('div')
+           .attr('class','form-group')
+          networkControl.append('label')
+          .attr('class','control-label')
+          .text('Choose Layout:');
+       var layoutSelect=layoutControl.append('select')
+           .attr('id','layout')
+           .attr('class','form-control')
+           .on('change',function(){
+                var selectedMetaKey=d3.select('#layout').property('value');
+                self.trigger('layoutChanged',selectedMetaKey)
+           });                
+        var layoutOptions=layoutSelect
+           .selectAll('option')
+           .data(['Cytoscape','Own']).enter()
+           .append('option')
+           .text(function(d){return d;})
+           .attr('value',function(d){return d;});
+
         if(this.model.resultid){
         	var testControl=this.el.append('div')
         		.attr('class','form-group')
@@ -333,6 +358,7 @@ var Controler = Backbone.View.extend({
 		$('#shape').val(this.scatterPlot.shapeKey); 
 		$('#color').val(this.scatterPlot.colorKey);
 		$('#network').val(this.scatterPlot.networkKey);
+		$('#layout').val(this.scatterPlot.layoutKey);
 		if(this.model.resultid){
 			console.log('changetesttypecalled');
 			$('#test').value(this.scatterPlot.testKey);

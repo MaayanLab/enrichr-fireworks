@@ -203,6 +203,7 @@ class Fisher(object):
             pvalues.append(p)
               
         return pvalues 
+#http://connor-johnson.com/2014/12/31/the-pearson-chi-squared-test-with-python-and-r/
 class Other(object):
 	def __init__(self,data):
 		self.data=set(data)
@@ -220,7 +221,6 @@ class Other(object):
 				chi,pval,d,exp=chi2_contingency([[intersection, genelist-intersection],[genelist,total-genelist]])                    
 			p=pval
 			pvalues.append(p)
-		print(pvalues)            
 		return pvalues
 
 class GeneSets(UserInput):

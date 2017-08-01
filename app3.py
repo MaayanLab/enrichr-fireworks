@@ -18,8 +18,9 @@ import pandas as pd
 
 from flask import Flask, request, redirect, render_template, send_from_directory, abort, Response
 enter_point='/enrichr-fireworks' 
-allcyjs=np.array(["diseases_adjmat.txt.gml.cyjs","TFnewlib.gml.cyjs","celltype(noknn&nothresh25)small.gml.cyjs","ontologies_adjmatfixed.txt.gml.cyjs","pathwaynewmethod.gml.cyjs"])
-allmetadata=np.array(["disall1.txt","tfnewlibmeta2.txt","celltype(noknn&nothresh25)names.txt","ontologyall1.txt","pathwaynewmethodnames.txt"])
+allcyjs=np.array(["Disease(noknn&nothresh25).gml.cyjs","TF(noknn&nothresh25)weightedthresh99.gml.cyjs","celltypejul31(noknn&nothresh25).gml.cyjs","Ontologyjul31(knn&thresh25).gml.cyjs","pathwaynewmethod.gml.cyjs"])
+allcyjs2=np.array(["Diseaserandom.json","TFpositionsnoknn99(0.2).txt","CellTypepositions.txt","Ontologyrandom.json","Pathwayrandom.json"])
+allmetadata=np.array(["Disease(noknn&nothresh25)names.txt","TF(noknn&nothresh25)weightedthresh99names.txt","celltypejul31(noknn&nothresh25)names.txt","Ontologyjul31(knn&thresh25)names.txt","pathwaynewmethodnames.txt"])
 app2 = Flask(__name__, static_url_path=enter_point, static_folder=os.getcwd())
 
 app2.config['SEND_FILE_MAX_AGE_DEFAULT'] = 6
@@ -32,20 +33,23 @@ app2.debug=True
 
 @app2.before_first_request
 def load_globals2():
-    global metadatalist, graph_df_list, genelistnames, genesetlist, Res 
+    global metadatalist, graph_df_list, graph_df_list_2, genelistnames, genesetlist, Res 
     Res=pd.DataFrame()
     cyjslist=[]
+    cyjslist2=[]
     metadatalist=[]
     graph_df_list=[]
+    graph_df_list_2=[]
     for i in range(allcyjs.size):
         cyjslist.append(allcyjs[i])
+        cyjslist2.append(allcyjs2[i])
         metadatalist.append(pd.read_csv(allmetadata[i]))
     
     for i in range(len(cyjslist)):
         graph_df_list.append(load_graph(cyjslist[i],metadatalist[i]))
-
+        graph_df_list_2.append(load_graph(cyjslist2[i],metadatalist[i]))
 # taken from https://stackoverflow.com/questions/17714571/creating-a-dictionary-from-a-txt-file-using-python   
-    genelistnames={1:'TFnewlibgeneset.txt',2:'celltype(noknn&nothresh25)genes.txt',3:'Ontologygeneset.txt',0:'Diseasesgeneset.txt',4:'pathwaynewmethodgenes.txt'}
+    genelistnames={1:'TF(noknn&nothresh25)weightedthresh99genes.txt',2:'celltypejul31(noknn&nothresh25)genes.txt',3:'Ontologyjul31(knn&thresh25)genes.txt',0:'Disease(noknn&nothresh25)genes.txt',4:'pathwaynewmethodgenes.txt'}
     #genelistnames={0:'Diseasesgeneset.txt',1:'TFgeneset.txt',2:'CellTypegeneset.txt'}
     genesetlist={}
     #each key in genesetlist corresponds to a list(of all genesets) of lists(of genes)
@@ -67,13 +71,22 @@ def index_page():
         enter_point=enter_point,
         result_id='hello')  
 
-@app2.route(enter_point + '/graph/<string:graph>', methods=['GET'])
-def load_graph_layout_coords(graph):
+@app2.route(enter_point + '/graph/<string:graph>/<string:layout>', methods=['GET'])
+def load_graph_layout_coords(graph,layout):
 	if request.method == 'GET':
 		index=int(graph)
-		print graph_df_list[index].shape
-		return graph_df_list[index].reset_index().to_json(orient='records')
-    
+		if layout=='cy':
+			print graph_df_list[index].shape
+			return graph_df_list[index].reset_index().to_json(orient='records')
+		print graph_df_list_2[index].shape
+		return graph_df_list_2[index].reset_index().to_json(orient='records')       
+
+@app2.route(enter_point + '/graph/<string:layout>/<string:graph>', methods=['GET'])
+def load_graph_layout_coords_own(layout,graph):
+	if request.method == 'GET':
+		index=int(graph)
+		print graph_df_list_2[index].shape
+		return graph_df_list_2[index].reset_index().to_json(orient='records')    
 
 @app2.route(enter_point + '/sig_ids', methods=['GET'])
 def get_all_sig_ids():
@@ -118,16 +131,17 @@ def post_to_sigine():
 
     
    #this gets called by the result javascript method
-@app2.route(enter_point + '/result/<string:testtype>/<string:graph>/<string:result_id>', methods=['GET'])
-def result(testtype,graph, result_id):
+@app2.route(enter_point + '/result/<string:testtype>/<string:graph>/<string:layout>/<string:result_id>', methods=['GET'])
+def result(testtype,graph, layout, result_id):
 	"""
 	Retrieve a simiarity search result using id and combine it
 	with graph layout.
 	"""
 	index=int(graph)
-
-	graph_df=graph_df_list[index]  
-
+	if layout=='cy':
+		graph_df=graph_df_list[index]  
+	else:
+		graph_df=graph_df_list_2[index]
 	# retrieve enrichment results from db
 	result_obj = EnrichmentResult(result_id,testtype,index)
 	# bind enrichment result to the network layout

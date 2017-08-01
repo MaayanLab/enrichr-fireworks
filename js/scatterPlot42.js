@@ -274,7 +274,9 @@ var Scatter3dView = Backbone.View.extend({
 		is3d: true, // 3d or 2d
 		testtype: 'fishertest',
 		graphtype:0,
-		testkey:'Fisher Test'
+		testkey:'Fisher Test',
+		layouttype:'cy',
+		layoutKey:'Cytoscape',
 	},
 
 	initialize: function(options){
@@ -441,9 +443,24 @@ var Scatter3dView = Backbone.View.extend({
 		if(key.localeCompare('Pathway')==0)
 			this.graphtype=4;
 		if(searchid)
-		 	this.model.set('url','result/'+this.testtype+'/'+this.graphtype+'/'+searchid);
+		 	this.model.set('url','result/'+this.testtype+'/'+this.graphtype+'/'+this.layouttype+'/'+searchid);
 	  		else
-	 			this.model.set('url','graph/'+this.graphtype);
+	 			this.model.set('url','graph/'+this.graphtype+'/'+ this.layouttype);
+	 	this.model.fetch();
+	},
+
+	changeLayoutBy: function(key){
+		$("#renderer").remove();
+		this.layoutKey=key;
+		var searchid=sigSimSearch.result_id;
+		if(key.localeCompare('Cytoscape')==0)
+			this.layouttype='cy';
+		if(key.localeCompare('Own')==0)
+			this.layouttype='own';
+		if(searchid)
+		 	this.model.set('url','result/'+this.testtype+'/'+this.graphtype+'/'+this.layouttype+'/'+searchid);
+	  		else
+	 			this.model.set('url','graph/'+this.graphtype+'/'+ this.layouttype);
 	 	this.model.fetch();
 	},
 
