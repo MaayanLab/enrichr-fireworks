@@ -18,9 +18,9 @@ import pandas as pd
 
 from flask import Flask, request, redirect, render_template, send_from_directory, abort, Response
 enter_point='/enrichr-fireworks' 
-allcyjs=np.array(["Disease(noknn&nothresh25).gml.cyjs","TF(noknn&nothresh25)weightedthresh99.gml.cyjs","celltypejul31(noknn&nothresh25).gml.cyjs","Ontologyjul31(knn&thresh25).gml.cyjs","pathwaynewmethod.gml.cyjs"])
-allcyjs2=np.array(["Diseaserandom.json","TFpositionsnoknn99(0.2).txt","CellTypepositions.txt","Ontologyrandom.json","Pathwayrandom.json"])
-allmetadata=np.array(["Disease(noknn&nothresh25)names.txt","TF(noknn&nothresh25)weightedthresh99names.txt","celltypejul31(noknn&nothresh25)names.txt","Ontologyjul31(knn&thresh25)names.txt","pathwaynewmethodnames.txt"])
+allcyjs=np.array(["Disease(noknn&nothresh25).gml.cyjs","TF(noknn&nothresh25)weightedthresh99.gml.cyjs","celltypejul31(noknn&nothresh25).gml.cyjs","Ontologyjul31(knn&thresh25).gml.cyjs","Pathwayjul31(noknn&nothresh25).gml.cyjs"])
+allcyjs2=np.array(["Diseaserandom.json","TFpositionsnoknn99(0.2).txt","CellTypepositions.txt","Ontology(.001).txt","Path(real.001).txt"])
+allmetadata=np.array(["Disease(noknn&nothresh25)names.txt","TF(noknn&nothresh25)weightedthresh99names.txt","celltypejul31(noknn&nothresh25)names.txt","Ontologyjul31(knn&thresh25)names.txt","Pathwayjul31(noknn&nothresh25)names.txt"])
 app2 = Flask(__name__, static_url_path=enter_point, static_folder=os.getcwd())
 
 app2.config['SEND_FILE_MAX_AGE_DEFAULT'] = 6
@@ -49,7 +49,7 @@ def load_globals2():
         graph_df_list.append(load_graph(cyjslist[i],metadatalist[i]))
         graph_df_list_2.append(load_graph(cyjslist2[i],metadatalist[i]))
 # taken from https://stackoverflow.com/questions/17714571/creating-a-dictionary-from-a-txt-file-using-python   
-    genelistnames={1:'TF(noknn&nothresh25)weightedthresh99genes.txt',2:'celltypejul31(noknn&nothresh25)genes.txt',3:'Ontologyjul31(knn&thresh25)genes.txt',0:'Disease(noknn&nothresh25)genes.txt',4:'pathwaynewmethodgenes.txt'}
+    genelistnames={1:'TF(noknn&nothresh25)weightedthresh99genes.txt',2:'celltypejul31(noknn&nothresh25)genes.txt',3:'Ontologyjul31(knn&thresh25)genes.txt',0:'Disease(noknn&nothresh25)genes.txt',4:'Pathwayjul31(noknn&nothresh25)genes.txt'}
     #genelistnames={0:'Diseasesgeneset.txt',1:'TFgeneset.txt',2:'CellTypegeneset.txt'}
     genesetlist={}
     #each key in genesetlist corresponds to a list(of all genesets) of lists(of genes)

@@ -18,7 +18,7 @@ var Legend = Backbone.View.extend({
 		_.defaults(this, options)
 		this.setUpDOMs();
 		// render if the scatterPlot changed
-		this.listenTo(this.scatterPlot, 'shapeChanged', this.render)
+	//	this.listenTo(this.scatterPlot, 'shapeChanged', this.render)
 		this.listenTo(this.scatterPlot, 'colorChanged', this.render)
      	this.listenTo(this.scatterPlot,'networkChanged',this.render)  
      	this.listenTo(this.scatterPlot,'testChanged',this.render) 
@@ -91,7 +91,7 @@ var Scores = Backbone.View.extend({
 		container: document.body,
 		scatterPlot: Scatter3dView,
 		w: 300,
-		h: 500,
+		h: 250,
 		// testtype:null,
 		// graphtype:null,
 		// result_id:null,
@@ -103,7 +103,7 @@ var Scores = Backbone.View.extend({
 		_.defaults(this, options)
 		// render if the scatterPlot changed
 		//this.render();
-		this.listenTo(this.scatterPlot, 'shapeChanged', this.render)
+		//this.listenTo(this.scatterPlot, 'shapeChanged', this.render)
 		this.listenTo(this.scatterPlot, 'colorChanged', this.render)
      	this.listenTo(this.scatterPlot,'networkChanged',this.render)  
      	this.listenTo(this.scatterPlot,'testChanged',this.render) 
@@ -140,17 +140,23 @@ var Scores = Backbone.View.extend({
 		
 	},
 	tabulate: function(data){
+		var width = this.w+'px';
+		var height = this.h+'px';
+		var twidth = (this.w -25)+'px';
+		var divheight=(this.h -60)+'px';
 		var data=globaldata;
 		columns=['geneset','library','score']
 		columns2=['geneset','library','p-value']
  		var table = d3.select(this.container).append('table').attr("id","table");
- 		var thead = table.append('thead');
- 		var tbody=table.append('tbody');
- 		thead.append('tr')
- 			.selectAll('th')
- 			.data(columns2).enter()
- 			.append('th')
- 			.text(function (column){return column;});
+ 		table.append('tr').append('td')
+ 			.append('table').attr('class','headerTable').attr('width',width)
+ 			.append('tr').selectAll('th').data(columns2).enter()
+ 			.append('th').text(function (column){return column;})
+ 		var inner = table.append('tr').append('td')
+ 			.append('div').attr('class','scroll').attr('width',width).attr('style','height:'+divheight+';')
+ 			.append('table').attr('class', 'bodyTable').attr('border', 1).attr("width", twidth).attr("height", height).
+ 			attr("style", "table-layout:fixed");
+ 		var tbody = inner.append('tbody');
  		var rows = tbody.selectAll('tr')
  			.data(data)
  			.enter()
@@ -164,6 +170,7 @@ var Scores = Backbone.View.extend({
  			.enter()
  			.append('td')
  				.text(function (d){return d.value;});
+ 	
  		return table;
  	},
 
@@ -195,11 +202,11 @@ var Controler = Backbone.View.extend({
 
 		var result_id=this.model.resultid;
 
-		this.listenTo(scatterPlot, 'shapeChanged', this.changeSelection);
+		//this.listenTo(scatterPlot, 'shapeChanged', this.changeSelection);
 
-		scatterPlot.listenTo(this, 'shapeChanged', function(selectedMetaKey){
-			scatterPlot.shapeBy(selectedMetaKey);
-		});
+		//scatterPlot.listenTo(this, 'shapeChanged', function(selectedMetaKey){
+		//	scatterPlot.shapeBy(selectedMetaKey);
+	//	});
 		scatterPlot.listenTo(this, 'colorChanged', function(selectedMetaKey){
 			scatterPlot.colorBy(selectedMetaKey);
 		});
@@ -215,7 +222,7 @@ var Controler = Backbone.View.extend({
        });     
 
        this.listenTo(scatterPlot,'layoutChanged',this.changeSelection);
-       
+
        scatterPlot.listenTo(this,'testChanged', function(selectedMetaKey){
        		scatterPlot.changeTestBy(selectedMetaKey);
        });

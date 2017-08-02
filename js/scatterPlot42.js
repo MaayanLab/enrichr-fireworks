@@ -66,7 +66,11 @@ var _ScatterDataSubset = Backbone.Model.extend({
 			var label = '';
 			for (var j = 0; j < labelKeys.length; j++) {
 				var labelKey = labelKeys[j];
-				label += labelKey + ': ' + record[labelKey] + '\n';
+				if (labelKey.localeCompare('score')==0){
+					labelKey2='p-value';
+				}
+					else labelKey2=labelKey;
+				label += labelKey2 + ': ' + record[labelKey] + '\n';
 			};
 			labels[i] = label
 		};
@@ -472,7 +476,7 @@ var Scatter3dView = Backbone.View.extend({
 		if(key.localeCompare('Chi Square')==0)
 			this.testtype='othertest';	
 		this.testkey=key;
-		this.model.set('url','result/'+this.testtype+'/'+this.graphtype+'/'+searchid);
+		this.model.set('url','result/'+this.testtype+'/'+this.graphtype+'/'+this.layout+'/'+searchid);
 		this.model.fetch();
 	},
 	
@@ -681,9 +685,11 @@ var Scatter3dView = Backbone.View.extend({
 		var meta = _.findWhere(this.model.metas, {name: metaKey});
 		var dtype = meta.type;
 		var fullrange=["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b",
-		"#e377c2","#7f7f7f","#bcbd22","#17becf","#393b79","#637939","#8c6d31"];
+		"#e377c2","#7f7f7f","#bcbd22","#17becf","#393b79","#637939","#8c6d31","#843c39",
+		"#7b4173","#ffff00","#0b5345"];
 		var intermediaterange = ["#aec7e8","#ffbb78","#98df8a","#ff9896","#c5b0d5",
-		"#c49c94","#f7b6d2","#c7c7c7","#dbdb8d","#9edae5","#9c9ede","#cedb9c","#e7cb94"];
+		"#c49c94","#f7b6d2","#c7c7c7","#dbdb8d","#9edae5","#9c9ede","#cedb9c","#e7cb94",
+		"#e7969c","#de9ed6","#ffffcc","#a2d9ce"];
 		
 		if (dtype !== 'number'){
 			metas = encodeRareCategories(metas, 19);
