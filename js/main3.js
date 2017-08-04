@@ -7,8 +7,14 @@ var sd = new ScatterData({
 	textures: textures,
 })
 
+var container=document.getElementById('body')
+var width= container.clientWidth;
+var height=container.clientHeight;
 
 var sdv = new Scatter3dView({
+	container: container,
+	WIDTH: width,
+	HEIGHT: height,
 	model: sd,
 	textures: textures,
 	// pointSize: 0.1, 
@@ -18,9 +24,9 @@ var sdv = new Scatter3dView({
 	shapeKey: 'library',
 	labelKey: ['geneset','library'],
 })
-var legend = new Legend({scatterPlot: sdv, h: window.innerHeight})
+var legend = new Legend({scatterPlot: sdv, h: window.innerHeight, container: container})
 
-var controler = new Controler({scatterPlot: sdv, h: window.innerHeight-800, w: 200})
+var controler = new Controler({scatterPlot: sdv, h: window.innerHeight-800, w: 200, container: container})
 
 //var search = new SearchSelectize({scatterPlot: sdv, container: "#controls"})
 

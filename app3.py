@@ -176,25 +176,31 @@ def topn_page(testtype,graph,result_id):
 @app2.route(enter_point + '/result/download/<string:result_id>', methods=['POST','GET'])
 def result_download(result_id):
 	#To download the results to a csv file.
-	s = StringIO.StringIO()
+	s=StringIO.StringIO()
+	filename=('enrichment_search_result_(%s).csv' % result_id)
 	result_df={}
+	frames=[]
+	    
 	for i in range(len(graph_df_list)):
 		result_obj = EnrichmentResult(result_id,'fishertest',i)
     	# Prepare a DataFrame for the result
-        #can we implement this for all 
-    	graph_df=graph_df_list[i]
-    	scores = result_obj.result['score']
-    	result_df[i] = pd.DataFrame({'similarity_scores': scores, 
-    		'geneset': graph_df['geneset'],
-    		'library': graph_df['library'],
-    		}, index=graph_df.index)\
-    		.sort_values('similarity_scores', ascending=True)
+        #can we implement this for all
+
+		graph_df=graph_df_list[i]
+		scores = result_obj.result['score']
+		result_df[i] = pd.DataFrame({'p_value': scores, 
+	    	'geneset': graph_df['geneset'],
+	    	'library': graph_df['library'],
+	    	})\
+			.sort_values('p_value', ascending=True)
 	# Write into memory
-    	result_df[i].to_csv(s,mode='a')
+		frames.append(result_df[i])
 	# Prepare response
+	final=pd.concat(frames)
+	final.to_csv(s)	
 	resp = Response(s.getvalue(), mimetype='text/csv')
-	resp.headers['Content-Disposition'] = 'attachment; filename=similarity_search_result-%s.csv' \
-	# result_id
+	resp.headers['Content-Disposition'] = 'attachment; filename=%s' \
+		% filename
 	return resp
 
 
