@@ -138,6 +138,9 @@ var Scatter3dCloud = Backbone.View.extend({
 
 	setColors: function(colorScale, metaKey){
 		// Color points by a certain metaKey given colorScale
+		if(metaKey.localeCompare('pvalue')==0){
+			metaKey='score'
+		}
 		var metas = this.model.getAttr(metaKey)
 		// construct colors BufferAttribute
 		var colors = new Float32Array( this.model.n * 3);
@@ -278,9 +281,9 @@ var Scatter3dView = Backbone.View.extend({
 		is3d: true, // 3d or 2d
 		testtype: 'fishertest',
 		graphtype:0,
-		testkey:'Fisher Test',
+		testkey:'Fishers Test',
 		layouttype:'cy',
-		layoutKey:'Cytoscape',
+		layoutKey:'Allegro Edge Repulsive',
 	},
 
 	initialize: function(options){
@@ -445,7 +448,7 @@ var Scatter3dView = Backbone.View.extend({
 		if(key.localeCompare('Ontology')==0)
 			this.graphtype=3;
 		if(key.localeCompare('Pathway')==0)
-			this.graphtype=4;
+			this.graphtype=3;
 		if(searchid)
 		 	this.model.set('url','result/'+this.testtype+'/'+this.graphtype+'/'+this.layouttype+'/'+searchid);
 	  		else
@@ -457,9 +460,9 @@ var Scatter3dView = Backbone.View.extend({
 		$("#renderer").remove();
 		this.layoutKey=key;
 		var searchid=sigSimSearch.result_id;
-		if(key.localeCompare('Cytoscape')==0)
+		if(key.localeCompare('Allegro Edge Repulsive')==0)
 			this.layouttype='cy';
-		if(key.localeCompare('Own')==0)
+		if(key.localeCompare('Basic Edge Repulsive')==0)
 			this.layouttype='own';
 		if(searchid)
 		 	this.model.set('url','result/'+this.testtype+'/'+this.graphtype+'/'+this.layouttype+'/'+searchid);
@@ -470,13 +473,16 @@ var Scatter3dView = Backbone.View.extend({
 
 	changeTestBy: function(key){
 		$("#renderer").remove();
+		$("#table").remove();
+
 		var searchid=sigSimSearch.result_id;	
-		if(key.localeCompare('Fisher Test')==0)
+		if(key.localeCompare('Fishers Test')==0)
 			this.testtype='fishertest';
 		if(key.localeCompare('Chi Square')==0)
 			this.testtype='othertest';	
 		this.testkey=key;
-		this.model.set('url','result/'+this.testtype+'/'+this.graphtype+'/'+this.layout+'/'+searchid);
+		console.log('testtype'+this.testkey+this.testtype);
+		this.model.set('url','result/'+this.testtype+'/'+this.graphtype+'/'+this.layouttype+'/'+searchid);
 		this.model.fetch();
 	},
 	
@@ -679,7 +685,15 @@ var Scatter3dView = Backbone.View.extend({
 		// Color points by a certain metaKey
 		// update colorKey
 		this.colorKey = metaKey;
-
+		if(metaKey=='pvalue'){
+			var metas = this.model.getAttr('score');
+			var colorExtent = d3.extent(metas);
+			var min_score = colorExtent[0],
+				max_score = colorExtent[1];
+			var colorScale = d3.scale.pow()
+				.domain([max_score, .0005, min_score])
+				.range(["#ddd","#e36667", "#d62728"]);
+		} else {
 		var metas = this.model.getAttr(metaKey);
 		//is this other metas term different?
 		var meta = _.findWhere(this.model.metas, {name: metaKey});
@@ -691,16 +705,16 @@ var Scatter3dView = Backbone.View.extend({
 		"#c49c94","#f7b6d2","#c7c7c7","#dbdb8d","#9edae5","#9c9ede","#cedb9c","#e7cb94",
 		"#e7969c","#de9ed6","#ffffcc","#a2d9ce"];
 		
-		if (dtype !== 'number'){
-			metas = encodeRareCategories(metas, 19);
-		}
+		// if (dtype !== 'number'){
+		// 	metas = encodeRareCategories(metas, 19);
+		// }
 		var uniqueCats = new Set(metas);
 		var nUniqueCats = uniqueCats.size;
 		uniqueCats = Array.from(uniqueCats);
 		// make colorScale
-		//only available for sets with 13 or less unique categories
+		//only available for sets with 17 or less unique categories
 		//var colorScaleLibrary=d3.scale.ordinal().domain()
-		if (dtype !== 'number') {
+		if (dtype !== 'number'||(meta.name!=='score')) {
 			var colorScale = d3.scale.ordinal().domain(uniqueCats).range(fullrange);
 
 		} else if (meta.name === 'score') { // similarity scores should center at 0
@@ -712,7 +726,7 @@ var Scatter3dView = Backbone.View.extend({
 			for (var i=0;i<uniqueCats2.length;i++){
 				colorScale[i]=d3.scale.pow()
 				//changed from 0 to 3 to make enriched terms more apparent 
-				.domain([colorExtent[1],.05,colorExtent[0]])
+				.domain([colorExtent[1],.005,colorExtent[0]])
 				.range(["#ddd",intermediaterange[i],fullrange[i]]);
 			}
 			var colorScaleBasic=d3.scale.ordinal().domain(uniqueCats2).range(fullrange);
@@ -730,10 +744,14 @@ var Scatter3dView = Backbone.View.extend({
 				.domain([min_score, (min_score+max_score)/2, max_score])
 				.range(["#1f77b4", "#ddd", "#d62728"]);
 		}
-
+}
 		this.colorScale = colorScale; // the d3 scale used for coloring nodes
 
 		this.trigger('colorChanged');
+		console.log('colorchange');
+		d3.select('#network').property('value',this.networkKey);
+		d3.select('#layout').property('value',this.layoutKey);
+		d3.select('#test').property('value',this.testkey);
 		this.renderScatter();
 	},
 

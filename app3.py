@@ -18,9 +18,13 @@ import pandas as pd
 
 from flask import Flask, request, redirect, render_template, send_from_directory, abort, Response
 enter_point='/enrichr-fireworks' 
-allcyjs=np.array(["Disease(noknn&nothresh25).gml.cyjs","TF(noknn&nothresh25)weightedthresh99.gml.cyjs","celltypejul31(noknn&nothresh25).gml.cyjs","Ontologyjul31(knn&thresh25).gml.cyjs","Pathwayjul31(noknn&nothresh25).gml.cyjs"])
-allcyjs2=np.array(["Diseaserandom.json","TFpositionsnoknn99(0.2).txt","CellTypepositions.txt","Ontology(.001).txt","Path(real.001).txt"])
-allmetadata=np.array(["Disease(noknn&nothresh25)names.txt","TF(noknn&nothresh25)weightedthresh99names.txt","celltypejul31(noknn&nothresh25)names.txt","Ontologyjul31(knn&thresh25)names.txt","Pathwayjul31(noknn&nothresh25)names.txt"])
+#allcyjs=np.array(["Disease(noknn&nothresh25).gml.cyjs","TF(noknn&nothresh25)weightedthresh99.gml.cyjs","celltypejul31(noknn&nothresh25).gml.cyjs","Ontologyjul31(knn&thresh25).gml.cyjs","Pathwayjul31(noknn&nothresh25).gml.cyjs"])
+allcyjs=np.array(["DisKNN.gml.cyjs","TFKNN.gml.cyjs","CellTypeKNN.gml.cyjs","PathKNN.gml.cyjs"])
+allcyjs2=np.array(["Dis(0.001).txt","TF(0.001).txt","Cell(0.001).txt","Path(real.001).txt"])
+allmetadata=np.array(["DisKNNnames.txt","TFKNN2names.txt","CellTypeKNNnames.txt","PathKNNnames.txt"])
+
+#allcyjs2=np.array(["Diseaserandom.json","TFpositionsnoknn99(0.2).txt","CellTypepositions.txt","Ontology(.001).txt","Path(real.001).txt"])
+#allmetadata=np.array(["Disease(noknn&nothresh25)names.txt","TF(noknn&nothresh25)weightedthresh99names.txt","celltypejul31(noknn&nothresh25)names.txt","Ontologyjul31(knn&thresh25)names.txt","Pathwayjul31(noknn&nothresh25)names.txt"])
 app2 = Flask(__name__, static_url_path=enter_point, static_folder=os.getcwd())
 
 app2.config['SEND_FILE_MAX_AGE_DEFAULT'] = 6
@@ -33,13 +37,16 @@ app2.debug=True
 
 @app2.before_first_request
 def load_globals2():
-    global metadatalist, graph_df_list, graph_df_list_2, genelistnames, genesetlist, Res 
+    global metadatalist, graph_df_list, graph_df_list_2, genelistnames, currentgraph, genesetlist, Res, currentlayout, currenttest
     Res=pd.DataFrame()
     cyjslist=[]
     cyjslist2=[]
     metadatalist=[]
     graph_df_list=[]
     graph_df_list_2=[]
+    currentgraph=0
+    currentlayout='cy'
+    currenttest='fishertest'
     for i in range(allcyjs.size):
         cyjslist.append(allcyjs[i])
         cyjslist2.append(allcyjs2[i])
@@ -49,8 +56,9 @@ def load_globals2():
         graph_df_list.append(load_graph(cyjslist[i],metadatalist[i]))
         graph_df_list_2.append(load_graph(cyjslist2[i],metadatalist[i]))
 # taken from https://stackoverflow.com/questions/17714571/creating-a-dictionary-from-a-txt-file-using-python   
-    genelistnames={1:'TF(noknn&nothresh25)weightedthresh99genes.txt',2:'celltypejul31(noknn&nothresh25)genes.txt',3:'Ontologyjul31(knn&thresh25)genes.txt',0:'Disease(noknn&nothresh25)genes.txt',4:'Pathwayjul31(noknn&nothresh25)genes.txt'}
-    #genelistnames={0:'Diseasesgeneset.txt',1:'TFgeneset.txt',2:'CellTypegeneset.txt'}
+   # genelistnames={1:'TF(noknn&nothresh25)weightedthresh99genes.txt',2:'celltypejul31(noknn&nothresh25)genes.txt',3:'Ontologyjul31(knn&thresh25)genes.txt',0:'Disease(noknn&nothresh25)genes.txt',4:'Pathwayjul31(noknn&nothresh25)genes.txt'}
+    genelistnames={1:'TFKNN2genes.txt',2:'CellTypeKNNgenes.txt',0:'DisKNNgenes.txt',3:'PathKNNgenes.txt'}
+
     genesetlist={}
     #each key in genesetlist corresponds to a list(of all genesets) of lists(of genes)
     for (k,v) in genelistnames.items():
@@ -69,12 +77,17 @@ def index_page():
     return render_template('index.html',
         script='main3',
         enter_point=enter_point,
-        result_id='hello')  
+        result_id='hello',
+        currentgraph=currentgraph)
 
 @app2.route(enter_point + '/graph/<string:graph>/<string:layout>', methods=['GET'])
 def load_graph_layout_coords(graph,layout):
 	if request.method == 'GET':
 		index=int(graph)
+		global currentgraph
+		currentgraph=index 
+		global currentlayout
+		currentlayout=layout
 		if layout=='cy':
 			print graph_df_list[index].shape
 			return graph_df_list[index].reset_index().to_json(orient='records')
@@ -85,6 +98,8 @@ def load_graph_layout_coords(graph,layout):
 def load_graph_layout_coords_own(layout,graph):
 	if request.method == 'GET':
 		index=int(graph)
+		global currentgraph
+		currentgraph=index        
 		print graph_df_list_2[index].shape
 		return graph_df_list_2[index].reset_index().to_json(orient='records')    
 
@@ -138,6 +153,12 @@ def result(testtype,graph, layout, result_id):
 	with graph layout.
 	"""
 	index=int(graph)
+	global currentgraph
+	currentgraph=index
+	global currentlayout
+	currentlayout=layout
+	global currenttest
+	currenttest=testtype    
 	if layout=='cy':
 		graph_df=graph_df_list[index]  
 	else:
@@ -157,7 +178,10 @@ def result_page(result_id):
 	return render_template('index.html', 
 		script='result', 
 		enter_point=enter_point,
-		result_id=result_id)
+		result_id=result_id,
+		currentgraph=currentgraph,
+		currentlayout=currentlayout,
+		currenttest=currenttest)
 
 @app2.route(enter_point+'/inputgenes/<string:result_id>',methods=['GET'])
 def gene_page(result_id):

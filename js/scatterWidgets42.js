@@ -90,7 +90,7 @@ var Scores = Backbone.View.extend({
 	defaults: {
 		container: document.body,
 		scatterPlot: Scatter3dView,
-		w: 300,
+		w: 600,
 		h: 250,
 		// testtype:null,
 		// graphtype:null,
@@ -119,10 +119,7 @@ var Scores = Backbone.View.extend({
 		$("#table").remove();
 		
 		this.getTopN();
-		console.log();
-		//this.tabulate
 
-		//return this;
 	},
 	getTopN: function(result_id,testtype,graphtype){
 		var result_id=this.scatterPlot.model.resultid;
@@ -153,8 +150,10 @@ var Scores = Backbone.View.extend({
  			.append('tr').selectAll('th').data(columns2).enter()
  			.append('th').text(function (column){return column;})
  		var inner = table.append('tr').append('td')
- 			.append('div').attr('class','scroll').attr('width',width).attr('style','height:'+divheight+';')
- 			.append('table').attr('class', 'bodyTable').attr('border', 1).attr("width", twidth).attr("height", height).
+ 			// .append('div').attr('class','scroll').attr('width',width).attr('style','height:'+divheight+';')
+ 			.append('div').attr('class','scroll').attr('style','height:'+divheight+';')
+ 			// .append('table').attr('class', 'bodyTable').attr('border', 1).attr("width", twidth).attr("height", height).			
+ 			.append('table').attr('class', 'bodyTable').attr('border', 1).attr("height", height).
  			attr("style", "table-layout:fixed");
  		var tbody = inner.append('tbody');
  		var rows = tbody.selectAll('tr')
@@ -186,7 +185,7 @@ var Controler = Backbone.View.extend({
 		container: document.body,
 		scatterPlot: Scatter3dView,
 		w: 300,
-		h: 800,
+		h: 600,
 	},
 
 	initialize: function(options){
@@ -202,11 +201,7 @@ var Controler = Backbone.View.extend({
 
 		var result_id=this.model.resultid;
 
-		//this.listenTo(scatterPlot, 'shapeChanged', this.changeSelection);
 
-		//scatterPlot.listenTo(this, 'shapeChanged', function(selectedMetaKey){
-		//	scatterPlot.shapeBy(selectedMetaKey);
-	//	});
 		scatterPlot.listenTo(this, 'colorChanged', function(selectedMetaKey){
 			scatterPlot.colorBy(selectedMetaKey);
 		});
@@ -270,32 +265,6 @@ var Controler = Backbone.View.extend({
 		// 	.text(function(d){return d;})
 		// 	.attr('value', function(d){return d;});
 
-		// Colors
-		// var colorControl = this.el.append('div')
-		// 	.attr('class', 'form-group')
-		// colorControl.append('label')
-		// 	.attr('class', 'control-label')
-		// 	.text('Color by:');
-
-		// var colorSelect = colorControl.append('select')
-		// 	.attr('id', 'color')
-		// 	.attr('class', 'form-control')
-		// 	.on('change', function(){
-		// 		var selectedMetaKey = d3.select('#color').property('value');
-		// 		self.trigger('colorChanged', selectedMetaKey)
-		// 	});
-		// var colormetas=_.pluck(metas,'name');
-		// colormetas.splice(0,1);
-		// colormetas.splice(1,1);
-
-		// var colorOptions = colorSelect
-		// 	.selectAll('option')
-		// 	.data(colormetas).enter()
-		// 	//.data(_.pluck(metas, 'name')).enter()
-		// 	.append('option')
-		// 	.text(function(d){return d;})
-		// 	.attr('value', function(d){return d;});
-        
         
        var networkControl=this.el.append('div')
            .attr('class','form-group')
@@ -311,11 +280,10 @@ var Controler = Backbone.View.extend({
            });                
         var networkOptions=networkSelect
            .selectAll('option')
-           .data(['Diseases and Drugs','Transcription','Cell Type','Ontology','Pathway']).enter()
+           .data(['Diseases and Drugs','Transcription','Cell Type','Pathway']).enter()
            .append('option')
            .text(function(d){return d;})
            .attr('value',function(d){return d;});
-
        var layoutControl=this.el.append('div')
            .attr('class','form-group')
           networkControl.append('label')
@@ -330,7 +298,7 @@ var Controler = Backbone.View.extend({
            });                
         var layoutOptions=layoutSelect
            .selectAll('option')
-           .data(['Cytoscape','Own']).enter()
+           .data(['Allegro Edge Repulsive','Basic Edge Repulsive']).enter()
            .append('option')
            .text(function(d){return d;})
            .attr('value',function(d){return d;});
@@ -350,11 +318,33 @@ var Controler = Backbone.View.extend({
         		});
         	var testOptions=testSelect
         		.selectAll('option')
-        		.data(['Fisher Test','Chi Square']).enter()
+        		.data(['Fishers Test','Chi Square']).enter()
         		.append('option')
         		.text(function(d){return d;})
         		//is the attr needed?
         		.attr('value',function(d){return d;});
+
+  //       var colorControl = this.el.append('div')
+		// 	.attr('class', 'form-group')
+		// colorControl.append('label')
+		// 	.attr('class', 'control-label')
+		// 	.text('Color by:');
+
+		// var colorSelect = colorControl.append('select')
+		// 	.attr('id', 'color')
+		// 	.attr('class', 'form-control')
+		// 	.on('change', function(){
+		// 		var selectedMetaKey = d3.select('#color').property('value');
+		// 		self.trigger('colorChanged', selectedMetaKey)
+		// 	});
+
+		// var colorOptions = colorSelect
+		// 	.selectAll('option')
+		// 	.data(['library','pvalue']).enter()
+		// 	//.data(_.pluck(metas, 'name')).enter()
+		// 	.append('option')
+		// 	.text(function(d){return d;})
+		// 	.attr('value', function(d){return d;});
         }
  
 		return this;
@@ -362,6 +352,7 @@ var Controler = Backbone.View.extend({
 
 	changeSelection: function(){
 		// change the current selected option to value
+		cosole.log('changeselectioncalled')
 		$('#shape').val(this.scatterPlot.shapeKey); 
 		$('#color').val(this.scatterPlot.colorKey);
 		$('#network').val(this.scatterPlot.networkKey);
@@ -445,7 +436,8 @@ var SigSimSearchForm = Backbone.View.extend({
 ],
 		}, 
 		action: 'search',
-		result_id: undefined
+		result_id: undefined,
+		initialgraph:0
 	},
 
 	initialize: function(options){
@@ -474,7 +466,7 @@ var SigSimSearchForm = Backbone.View.extend({
 		this.upGeneTa = $('<textarea name="upGenes" rows="5" class="form-control" required></textarea>');
 		upGeneDiv.append(this.upGeneTa);
 
-
+		this.initialgraph=this.scatterPlot.graphtype
 		var self = this;
 		var exampleBtn = $('<button class="btn btn-xs pull-left">Example</button>').click(function(e){
 			e.preventDefault();
@@ -486,7 +478,9 @@ var SigSimSearchForm = Backbone.View.extend({
 			self.populateGenes([], []);
 		});
 
-		var submitBtn = $('<input type="submit" class="btn btn-xs pull-right" value="Search"></input>');
+
+
+		var submitBtn = $('<input type="submit" class="btn btn-xs pull-right" value="Submit"></input>');
 
 		var downloadBtn = $('<input type="submit" class="btn btn-xs" value="Download"></input>');
 
