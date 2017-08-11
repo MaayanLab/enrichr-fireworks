@@ -19,9 +19,9 @@ import pandas as pd
 from flask import Flask, request, redirect, render_template, send_from_directory, abort, Response
 enter_point='/enrichr-fireworks' 
 #allcyjs=np.array(["Disease(noknn&nothresh25).gml.cyjs","TF(noknn&nothresh25)weightedthresh99.gml.cyjs","celltypejul31(noknn&nothresh25).gml.cyjs","Ontologyjul31(knn&thresh25).gml.cyjs","Pathwayjul31(noknn&nothresh25).gml.cyjs"])
-allcyjs=np.array(["DisKNN.gml.cyjs","TFKNN.gml.cyjs","CellTypeKNN.gml.cyjs","PathKNN.gml.cyjs"])
+allcyjs=np.array(["DiseaseNoDrugMatrix.gml.cyjs","TFKNN.gml.cyjs","CellTypeKNN.gml.cyjs","PathKNN.gml.cyjs"])
 allcyjs2=np.array(["Dis(0.001).txt","TF(0.001).txt","Cell(0.001).txt","Path(real.001).txt"])
-allmetadata=np.array(["DisKNNnames.txt","TFKNN2names.txt","CellTypeKNNnames.txt","PathKNNnames.txt"])
+allmetadata=np.array(["DiseaseNoDrugMatrixnames.txt","TFKNN2names.txt","CellTypeKNNnames.txt","PathKNNnames.txt"])
 
 #allcyjs2=np.array(["Diseaserandom.json","TFpositionsnoknn99(0.2).txt","CellTypepositions.txt","Ontology(.001).txt","Path(real.001).txt"])
 #allmetadata=np.array(["Disease(noknn&nothresh25)names.txt","TF(noknn&nothresh25)weightedthresh99names.txt","celltypejul31(noknn&nothresh25)names.txt","Ontologyjul31(knn&thresh25)names.txt","Pathwayjul31(noknn&nothresh25)names.txt"])
@@ -57,7 +57,7 @@ def load_globals2():
         graph_df_list_2.append(load_graph(cyjslist2[i],metadatalist[i]))
 # taken from https://stackoverflow.com/questions/17714571/creating-a-dictionary-from-a-txt-file-using-python   
    # genelistnames={1:'TF(noknn&nothresh25)weightedthresh99genes.txt',2:'celltypejul31(noknn&nothresh25)genes.txt',3:'Ontologyjul31(knn&thresh25)genes.txt',0:'Disease(noknn&nothresh25)genes.txt',4:'Pathwayjul31(noknn&nothresh25)genes.txt'}
-    genelistnames={1:'TFKNN2genes.txt',2:'CellTypeKNNgenes.txt',0:'DisKNNgenes.txt',3:'PathKNNgenes.txt'}
+    genelistnames={1:'TFKNN2genes.txt',2:'CellTypeKNNgenes.txt',0:'DiseaseNoDrugMatrixgenes.txt',3:'PathKNNgenes.txt'}
 
     genesetlist={}
     #each key in genesetlist corresponds to a list(of all genesets) of lists(of genes)
@@ -93,15 +93,7 @@ def load_graph_layout_coords(graph,layout):
 			return graph_df_list[index].reset_index().to_json(orient='records')
 		print graph_df_list_2[index].shape
 		return graph_df_list_2[index].reset_index().to_json(orient='records')       
-
-@app2.route(enter_point + '/graph/<string:layout>/<string:graph>', methods=['GET'])
-def load_graph_layout_coords_own(layout,graph):
-	if request.method == 'GET':
-		index=int(graph)
-		global currentgraph
-		currentgraph=index        
-		print graph_df_list_2[index].shape
-		return graph_df_list_2[index].reset_index().to_json(orient='records')    
+   
 
 @app2.route(enter_point + '/sig_ids', methods=['GET'])
 def get_all_sig_ids():
@@ -130,22 +122,8 @@ def post_to_sigine():
 		rid = gene_sets.save()
 		print rid
 		return redirect(enter_point + '/result/' + rid, code=302)
-    
-#@app2.route(enter_point+'/searchother', methods=['POST'])
-#def post_to_sigineother():
-#    if request.method=='POST':
-#        up_genes=request.form.get('upGenes','').split()
-#        gene_sets=GeneSets(up_genes)
-#        result=gene_sets.enrichother(genesetlist)
-#        #rid=gene_sets.saveanother()  #saves into same db as other
-#        rid=gene_sets.save()
-#        return redirect(enter_point+'/result/'+rid, code=302)
-
-
-
 
     
-   #this gets called by the result javascript method
 @app2.route(enter_point + '/result/<string:testtype>/<string:graph>/<string:layout>/<string:result_id>', methods=['GET'])
 def result(testtype,graph, layout, result_id):
 	"""

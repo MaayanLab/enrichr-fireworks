@@ -11,6 +11,8 @@ var sd = new ScatterData({
 	textures: textures,
 })
 
+//these constants embedded into the indexhtml script are necessary so that when the page is reloaded
+//when an enrichment is being run, the same settings are kept in the view
 if(currentgraph==0)
 	sdvgraph='Diseases and Drugs';
 if(currentgraph==1)
@@ -56,9 +58,4 @@ var topnscores = new Scores({scatterPlot:sdv})
 var controler = new Controler({scatterPlot: sdv, h: window.innerHeight/2, w: 200})
 
 var sigSimSearch = new SigSimSearchForm({scatterPlot: sdv, container: "#controls1", result_id: result_id})
-
-//controler.render();
-//var resultModalBtn = new ResultModalBtn({scatterPlot: sdv, container: document.body, result_id: result_id})
-
-//var resultModal = new ResultModal({scatterPlot: sdv});
 

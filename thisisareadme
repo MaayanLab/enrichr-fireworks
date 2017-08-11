@@ -1,0 +1,41 @@
+this is a read me
+
+
+before the first request, all files in the flask environment are loaded into their proper data frame in orm3's load graph method
+on the main page, flask sets up the template page using the index html script to load js libraries
+and flask calls on the main3 javascript file to create the objects
+
+in main3, the model is created with the data that is in the basic url
+the model fetches the information at the address, where flask stores the right dataframe 
+
+once model has the data from the url, it is stored in the data array
+
+the view object is created using the data stored in the model
+every time the data in the model changes, indicated by a sync, the view is rerendered
+setupstage and shapeby methods are called
+the change___By methods are used to change the data in the model whenever the controler is changed by the user
+the view object contains all of the information about the current state of the model: what layout,graph,testtype,andresultid it is accessing
+
+the shapeby function is able to separate data based on the metadata value. in order to shape nodes differently, the nodes need to be separated into clouds
+
+renderscatter is called for the following events: a zoomin/out of the view, a call to shapeBy, a call to colorBy, which updates the mouse array position
+
+in scatterwidgets, there is the controler object as well as the legend, search form, and overlay
+the controler provides tables for the user to choose between the different views. 
+each time one of the controls is changed, the corresponding method is called in the view, which 
+then calls on the model to change its url and reparse its data
+
+in flask script, global variables are set for current layout, test type, and graph and are updated with each request 
+
+the flask requests sent directly by the javascript include the urls for the function(request=GET)
+	indexpage-renders html index template with new objects from main3
+	loadgraphlayoutcoords
+	result-binds the score results, retrieved from the database, with a copy of the dataframe
+	resultpage-like index page, renders html template with onjects from result.js
+	topnpage-gives dataframe of top gene sets from each library in a category in list form for json file
+
+in the search POST request, flask calls methods in orm3 for running fishers and chisquare test
+results are stored in database, which gives a unique result id, and the unique result id is returned as a redirect url in addition to one of the variables passed in the render template method, where the model stores the resultid
+
+the example gene list in sigsimsearchform is from the creeds library
+

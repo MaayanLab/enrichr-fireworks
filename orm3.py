@@ -16,8 +16,9 @@ from pymongo import MongoClient
 from decimal import Decimal
 from scipy.stats import chi2_contingency
 
-client=MongoClient('mongodb://146.203.54.131:27017/')
-#client=MongoClient('localhost',27017)
+MONGOURI=os.environ['MONGOURI']
+
+client=MongoClient(MONGOURI)
 db=client.test
 
 def load_graph(cyjs_filename,meta_df): 
@@ -233,20 +234,3 @@ class GeneSets(UserInput):
 		'''Return an object to be encoded to json format'''
 		return self.data
     
-#genelistnames={1:'TFgeneset.txt',2:'CellTypegeneset.txt',3:'Ontologygeneset.txt',0:'Diseasesgeneset.txt'}
-#genesetlist={}
-##each key in genesetlist corresponds to a list(of all genesets) of lists(of genes)
-#for (k,v) in genelistnames.items():
-#    genesetlist[k]=[]
-#    with open(v,'r') as f:
-#        for line in f:
-#            spl=line.split()
-#            li=[]
-#            for i in spl[1:]:
-#                li.append(i)
-#            genesetlist[k].append(li)
-#            
-#data=['suh']
-#why=GeneSets(data)
-#why2=why.enrich(genesetlist)
-#print(why2) 

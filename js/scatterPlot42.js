@@ -107,7 +107,6 @@ var Scatter3dCloud = Backbone.View.extend({
 		this.geometry.setIndex( new THREE.BufferAttribute( model.indices, 1 ) );
 		this.geometry.addAttribute( 'position', new THREE.BufferAttribute( model.positions, 3 ) );		
 		this.geometry.addAttribute( 'label', new THREE.BufferAttribute( model.getLabels(this.labelKey), 1 ) );
-		// this.geometry.addAttribute( 'pert_id', new THREE.BufferAttribute( model.getAttr('pert_id'), 1 ) );
 		this.geometry.addAttribute( 'sig_id', new THREE.BufferAttribute( model.getAttr('sig_id'), 1 ) )
 
 	    this.geometry.computeBoundingSphere();
@@ -175,6 +174,10 @@ var Scatter3dCloud = Backbone.View.extend({
 });
 
 
+// this is the model, which points to the url where flask keeps the corresponding
+//json file
+//url is changed in the controler object
+//textures field added so that 
 
 var ScatterData = Backbone.Model.extend({
 	// model for the data (positions) and metadata. 
@@ -216,15 +219,12 @@ var ScatterData = Backbone.Model.extend({
 		_.defaults(options, this.defaults)
 		_.defaults(this, options)
 		// fetch json data from server
-		//this.fetch();
+		//make sure the textures are loaded before calling data
 		 this.listenToOnce(this.textures, 'allLoaded', function(){
-		  	//this.fetch();
-		 	//this.setAttr('url',this.url);
+		 //everytime fetch is called, model parsed
 		 	this.fetch();
 				 });
-		 // this.listenToOnce(this.resultid,function(){
-		 // 	this.fetch();
-		 // });
+
 		
 
 
@@ -260,6 +260,10 @@ var ScatterData = Backbone.Model.extend({
 	},
 });
 
+//the network,test,andlayout keys refer to user-side values of the 
+//network,test,and layout types which refer to the url assignment
+//the controller calls the methods here to call the model
+//in order to change the url for the model data which the view refers to
 
 var Scatter3dView = Backbone.View.extend({
 	// this is the view for all points
@@ -295,13 +299,16 @@ var Scatter3dView = Backbone.View.extend({
 
 		this.listenToOnce(this.textures, 'allLoaded', function(){
 			//if a list of genes is being enriched, remove the previous view
+			//from the webpage
 				if(this.model.resultid){
 					this.listenToOnce(self.model,'sync', function(){
-						console.log('rmv');
+						//console.log('rmv');
 						$("#renderer").remove();
 					});
 				}
 			//if the data in the model changes, rerender plot
+			//by deleting old renderer 
+			//shapeBy calls colorBy
 			self.listenTo(self.model, 'sync', function(){
 				console.log('model synced')
 				self.setUpStage();
@@ -311,6 +318,8 @@ var Scatter3dView = Backbone.View.extend({
 		});
 
 	},
+	//creates a renderer object, camera object, controls object
+	//renderer attached to container view 
 
 	setUpStage: function(){
 		// set up THREE.js visualization components
@@ -435,6 +444,12 @@ var Scatter3dView = Backbone.View.extend({
 			scene.remove(scene.children[i]);
 		}
 	},
+	//the 'changeby' methods are called by the controler object
+	//these methods change the url for the model
+	//if enrichment has been searched, the searchid is not null,
+	//and the url that needs to be called is changed appropriately
+	//the searchid is held by the sigsimsearch object, which pulls from 
+	//the unique id given by the database for any one search
 	changeNetworkBy: function(key){
 		$("#renderer").remove();
 		this.networkKey=key;
@@ -600,7 +615,8 @@ var Scatter3dView = Backbone.View.extend({
 		// calculate objects intersecting the picking ray
 		var allPoints = _.map(this.clouds, function(obj){ return obj.points; });
 		var intersects = this.raycaster.intersectObjects( allPoints );
-
+		//if you want to be redirected to a new page with a mouse click on a node,
+		// uncomment the variables and window.open(url) function
 		if ( intersects.length > 0 ) {
 			var intersect = intersects[0];
 			var idx = intersect.index;
@@ -667,6 +683,12 @@ var Scatter3dView = Backbone.View.extend({
 
 	resetColors: function(){
 		// reset colors based on this.metaKey, do not trigger any events.
+		//if colorscale constructor is an array, that means we are coloring by two properties
+		//the first property determines which color scale in the array to use
+		//the second property determine the output based on the given color scale
+		//if there are multipe shape types, nodes must be colored one shape, or cloud at a time
+		//if there are multiple color scales, each cloud represent the nodes colored by one of the scales
+
 		if (this.colorScale.constructor === Array){
 			for (var i = 0; i<this.clouds.length; i++ ){
 				var cloud=this.clouds[i];
@@ -686,6 +708,8 @@ var Scatter3dView = Backbone.View.extend({
 		// update colorKey
 		this.colorKey = metaKey;
 		if(metaKey=='pvalue'){
+		//used only if only coloring by score instead of by library or by library AND score
+		//this is a feature that has been commented out in the colorby function in controler object
 			var metas = this.model.getAttr('score');
 			var colorExtent = d3.extent(metas);
 			var min_score = colorExtent[0],
@@ -695,9 +719,11 @@ var Scatter3dView = Backbone.View.extend({
 				.range(["#ddd","#e36667", "#d62728"]);
 		} else {
 		var metas = this.model.getAttr(metaKey);
-		//is this other metas term different?
 		var meta = _.findWhere(this.model.metas, {name: metaKey});
 		var dtype = meta.type;
+		//these two arrays are used to provide various color scales. full range always used
+		//for color by library. intermediate range used if coloring by score and library,
+		//where each library needs a range of colors from transparent to full opacity
 		var fullrange=["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b",
 		"#e377c2","#7f7f7f","#bcbd22","#17becf","#393b79","#637939","#8c6d31","#843c39",
 		"#7b4173","#ffff00","#0b5345"];
@@ -705,37 +731,39 @@ var Scatter3dView = Backbone.View.extend({
 		"#c49c94","#f7b6d2","#c7c7c7","#dbdb8d","#9edae5","#9c9ede","#cedb9c","#e7cb94",
 		"#e7969c","#de9ed6","#ffffcc","#a2d9ce"];
 		
-		// if (dtype !== 'number'){
-		// 	metas = encodeRareCategories(metas, 19);
-		// }
+		//based on the metakey, find all of the unique values the metakey could be
+		// the variable metas holds all of the values ????
 		var uniqueCats = new Set(metas);
 		var nUniqueCats = uniqueCats.size;
 		uniqueCats = Array.from(uniqueCats);
 		// make colorScale
 		//only available for sets with 17 or less unique categories
-		//var colorScaleLibrary=d3.scale.ordinal().domain()
+
+		//basic color by library
 		if (dtype !== 'number'||(meta.name!=='score')) {
 			var colorScale = d3.scale.ordinal().domain(uniqueCats).range(fullrange);
 
+		// coloring by library and by score, make an array of color scales, one for each library
 		} else if (meta.name === 'score') { // similarity scores should center at 0
 			var colorScale=[];
 			var metas2 = this.model.getAttr("library");
 			var uniqueCats2 = new Set(metas2);
 			uniqueCats2=Array.from(uniqueCats2);
 			var colorExtent = d3.extent(metas);
+				//intermediate value of .005 chosen due to low score values
+				//scale given means only scores that are below .005 will be colored significantly
+				//.domain gives the range of values to be scaled, range gives the color scale itself
+				//pow creates a functionto take an input value and output a color from the scale
 			for (var i=0;i<uniqueCats2.length;i++){
 				colorScale[i]=d3.scale.pow()
-				//changed from 0 to 3 to make enriched terms more apparent 
 				.domain([colorExtent[1],.005,colorExtent[0]])
 				.range(["#ddd",intermediaterange[i],fullrange[i]]);
 			}
 			var colorScaleBasic=d3.scale.ordinal().domain(uniqueCats2).range(fullrange);
+			//colorscalebasic is used in the legend
 			this.colorScaleBasic=colorScaleBasic;
 
-			//keep the same range for all or change range by library? start with same forall
-			// var colorScale = d3.scale.pow()
-			// 	.domain([colorExtent[0], 0, colorExtent[1]])
-			// 	.range(["#ddd", "#a8d2f0", "#1f77b4"]);
+
 		} else {
 			var colorExtent = d3.extent(metas);
 			var min_score = colorExtent[0],
@@ -746,7 +774,9 @@ var Scatter3dView = Backbone.View.extend({
 		}
 }
 		this.colorScale = colorScale; // the d3 scale used for coloring nodes
-
+//because colorby is called whenever the model url switches, this method is a good place
+//to make sure each d3 controler table lists the correct value that is given by what 
+//each setting is set to in the view itself
 		this.trigger('colorChanged');
 		console.log('colorchange');
 		d3.select('#network').property('value',this.networkKey);
@@ -754,7 +784,7 @@ var Scatter3dView = Backbone.View.extend({
 		d3.select('#test').property('value',this.testkey);
 		this.renderScatter();
 	},
-
+//unused method
 	colorByScores: function(searchResult){
 		// To color nodes by similarity scores. 
 		// The input is the response from the /search endpoint.

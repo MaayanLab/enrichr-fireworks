@@ -63,6 +63,8 @@ var Legend = Backbone.View.extend({
 
 		// color legend
 		//fix colorscale if coloring by score, where colorscale is an array
+		//normally legend takes one color scale, since color by score uses an array of scales
+		//the basic color scale is provided in colorBy in view object for the legend
 		var colorscale=scatterPlot.colorScale;
 		if(colorscale.constructor === Array){
 			var colorscale=scatterPlot.colorScaleBasic;
@@ -92,9 +94,6 @@ var Scores = Backbone.View.extend({
 		scatterPlot: Scatter3dView,
 		w: 600,
 		h: 250,
-		// testtype:null,
-		// graphtype:null,
-		// result_id:null,
 	},
 
 	initialize: function(options){
@@ -102,7 +101,6 @@ var Scores = Backbone.View.extend({
 		_.defaults(options, this.defaults)
 		_.defaults(this, options)
 		// render if the scatterPlot changed
-		//this.render();
 		//this.listenTo(this.scatterPlot, 'shapeChanged', this.render)
 		this.listenTo(this.scatterPlot, 'colorChanged', this.render)
      	this.listenTo(this.scatterPlot,'networkChanged',this.render)  
@@ -113,9 +111,7 @@ var Scores = Backbone.View.extend({
 	},
 	render: function(){
 
-		//this.el=this.getTopN();
      	var globaldata=null;
-     	//var table;		
 		$("#table").remove();
 		
 		this.getTopN();
@@ -178,6 +174,12 @@ var Scores = Backbone.View.extend({
 
 });
 
+//the controller object calls on the view object whenever a user makes a change to what
+//it wants to be viewed on the page.
+//i dont think the changeselection method is actually ever called on
+//two controls are only available when the model is holding a result id, which means
+//that enrichment has been performed, these are for changing the test function
+//and possibly the colorby function
 
 var Controler = Backbone.View.extend({
 
@@ -364,7 +366,7 @@ var Controler = Backbone.View.extend({
 	},
 
 });
-
+//this method is not used
 var SearchSelectize = Backbone.View.extend({
 	// selectize to search for drugs by name
 	defaults: {
@@ -425,15 +427,69 @@ var SearchSelectize = Backbone.View.extend({
 
 });
 
+//this form collects user inputted gene list
+//retrieves the resultid from flask
+//the action field is set to search so that the url  request is enterpoint/search
+//which is posted for flask to run the proper calculations 
+//this action is a part of the form object
 
 var SigSimSearchForm = Backbone.View.extend({
 	//The <form> version of signature similarity search
 	defaults: {
 		container: "#controls1",
 		scatterPlot: Scatter3dView,
+		
 		example: {
-			up: ["HSD3B2","BEX1","STAR","TXNDC5","MRO","LDHB","LDHA","RPS29","NPTN","PTS","NDUFA12","MT2A","LTA4H","RPSA","H2AFZ","HSD11B1","COX2","HNRNPA1P10","IARS","SLC47A1","TMEM14B","SH3KBP1","PIGP","HIGD1A","PARK7","BOLA3","CYP11A1","SLC25A3","MMADHC","RPL9","TMEM45A","MRFAP1","COX7A2","LOC100507328","FDX1","LUM","RPL4","DPM1","TMEM123","CRELD2","SLC46A3","ALDH9A1","SLC26A2","GPX1","LGALS1","RPL22L1","SPCS1","RPL6","GMNN","TMSB10","GAPDH","UQCRQ","KPNA2","DYNLT1","FAM96A","PPIB","RAB13","SPPL2A","DYNLL1","OAZ1","USMG5","CHN1","HMGN3","SMCO4","RPLP0P6","HIST1H2BK","HTRA1","PPA1","HAT1","RPS26","PLOD2","PRDX1","LOC100507039","RPL39","SELK","LHCGR","EEF1B2","SOD1","PRKAR2B","RBX1","HSPA8","DHCR24","ANXA2P2","BNIP3","RPS13","COMMD3","ARF4","IMPA1","RPS4X","BASP1","UQCRFS1","MGARP","RPS14P3","KTN1","RPLP0","RPS11","AMIGO2","SEC31B","PDIA6","ATP5B","C20orf24","TMEM14C","SCP2","MRPL3","GOT2","PSMD2","MANF","HNRNPK","ACE2","PSMA1","LGALS12","RBM14","MRPS24","PSMD14","ATP5J","PRDX4","MT1E","RPS5","C14orf166","SLIRP","ACADM","LAP3","ODC1","NGFRAP1","ANXA5","TPST1","ATP5L","LOC100509635","CXCL6","ETFA","SACM1L","TOB1","GBE1","COMMD8","TMEM167A","ZMPSTE24","POMP","TUBB2A","CELA2A","SNRPG","COX6C","PCNA","MT1HL1","HSPA5","NDUFAB1","PGAM1","MFSD1","MYL12B","NDUFS6","SRP9","RPS21","MLLT11","EIF4A3","MICU2","LYPLA1","ROBO1","CHCHD2","HMGN1","OSTC","RYR3","NUDT9","ITGAV","RPL26L1","TMEM263","SRP14","NNMT","AIM1","C3","VCAM1","TUBA4A","GBP2","ALDH3A2","RPL34","NRIP3","MINPP1","MXRA5","NDUFA4","CDK2AP1","RPL22","RPL27","GNG10","CETN2","ATP2C1","RAB1A","RAP1B","TMEM14A","DECR1","UCHL3","TSPYL4","LINC00622","WBP5","TMA7","RRAGA","ERMP1","PSME2","ENOPH1","TGFBR3","GTF3C6","BZW1","LOC100508591","SEC61G","LRP11","PSMB4","DPY19L3","CUTA","TOMM5","COL5A2","MT1X","RPL41","NDUFB5","TAX1BP1","TMEM50A","GFPT2","AGL","RPL36A","RPL36AL","HSP90AA1","MT1F","HSD17B10","SEC13","C10orf32","TMEM133","LOC728825","RPS17","MEIS2","UBC","LINC00998","CYB561A3","UNC50","HIST1H2AC","APOO","PEG3","PSMB3","AADAC","RBBP7","PTTG1","RPS8","PORCN","SURF4","HSPE1","BET1","RPS7","HLA-DRB5","MIR22HG","ATP5G1","TDP2","KDELR2","TMED7","PSMC6","SRP19","GPR158","C1QBP","RPS18","DDX1","ANXA2","H3F3AP4","HIST1H1C","DNAJA1","LAPTM4A","PSMB5","PGRMC1","MRPL33","NME1","NPTX2","NDUFA8","TXNDC15","UBB","DNAJB11","PLGRKT","IFITM3","COX1","NIPSNAP3A","RPL24","PSMC1","SLC12A8","DAD1","IGDCC4","RPL32","C6orf211","TCEB1","NDUFAF1","NAA20","DLD","VBP1","CHCHD1","DBI","RPL23A","RPL21","VIMP","GBP3","PSMC2","C18orf32","NDUFA6","MSMO1","TIMM21","BMI1","GLIPR1","EZH2","C14orf119","UQCRH","SLC25A5","DHRS9","MT1H","OST4","HAPLN1","NID2","RPN2","TMEM181","PDHB","ATRAID","PSMD12","SKP1","ITGAE","NIT2","TCEAL8","NOP10","ATP5I","PSMA2","PSMA7","KIAA1462","CETN3","GALNT1","LOC100506748","RAN","ILF2","SUCLA2","P4HB","MAGEH1","GPX8","LINC00493","TNFAIP3","RAPGEF4","METTL23","DDX21","MRPL53","GLRX","TCEAL7","TST","IPO7","GCSHP5","HLA-DRB1","TRIAP1","SLC35B1","C4orf3","ABAT","ARCN1","RPL30","TUBB6","YBX1","RNF4","ENC1","PGRMC2","TAF9","TBC1D23","C1QTNF1-AS1","RRM2","JKAMP","CD59","RPL26","RPL10","PDIA3","HMGN2","OAT","DIRAS3","RPL7A","SLTM","GSKIP","TCEAL4","SLC2A10","TM2D3","CXCL1","TIMP1","SERINC5","MTCH2","HMGCR","GXYLT2","ADI1","FHL2","RPL3","MRPS33","NARS","FAM174A","NDUFC2","PITPNB","TEKT4P2","TMEM126A","TPRKB","TMEM69","PTX3","RCN2","HNRNPA3","MGST2","NRIP1","RPS27L","ETF1","GNG5","BIRC2","HADHB","SNX6","HSBP1","CLIC1","H3F3B","EIF2S1","C15orf48","PRDX6","TCEAL1","ATP6V0B","MLEC","GRPEL1","DPYSL2","CXCL8","SPCS3","SEC23B","NMI","TMEM208","EBNA1BP2","GSTA3","NAT1","IGSF11","FRG1","POLR2K","RNF11","IL7R","NCOA4","SEC11C","DUOXA2","FAM177A1","TSPAN12","PDIA4"
-],
+			up: ["HSD3B2","BEX1","STAR","TXNDC5","MRO",
+			"LDHB","LDHA","RPS29","NPTN","PTS","NDUFA12",
+			"MT2A","LTA4H","RPSA","H2AFZ","HSD11B1","COX2",
+			"HNRNPA1P10","IARS","SLC47A1","TMEM14B","SH3KBP1",
+			"PIGP","HIGD1A","PARK7","BOLA3","CYP11A1","SLC25A3",
+			"MMADHC","RPL9","TMEM45A","MRFAP1","COX7A2","LOC100507328",
+			"FDX1","LUM","RPL4","DPM1","TMEM123","CRELD2","SLC46A3",
+			"ALDH9A1","SLC26A2","GPX1","LGALS1","RPL22L1","SPCS1","RPL6",
+			"GMNN","TMSB10","GAPDH","UQCRQ","KPNA2","DYNLT1","FAM96A",
+			"PPIB","RAB13","SPPL2A","DYNLL1","OAZ1","USMG5","CHN1","HMGN3",
+			"SMCO4","RPLP0P6","HIST1H2BK","HTRA1","PPA1","HAT1","RPS26",
+			"PLOD2","PRDX1","LOC100507039","RPL39","SELK","LHCGR","EEF1B2",
+			"SOD1","PRKAR2B","RBX1","HSPA8","DHCR24","ANXA2P2","BNIP3","RPS13",
+			"COMMD3","ARF4","IMPA1","RPS4X","BASP1","UQCRFS1","MGARP","RPS14P3",
+			"KTN1","RPLP0","RPS11","AMIGO2","SEC31B","PDIA6","ATP5B","C20orf24",
+			"TMEM14C","SCP2","MRPL3","GOT2","PSMD2","MANF","HNRNPK","ACE2","PSMA1",
+			"LGALS12","RBM14","MRPS24","PSMD14","ATP5J","PRDX4","MT1E","RPS5","C14orf166",
+			"SLIRP","ACADM","LAP3","ODC1","NGFRAP1","ANXA5","TPST1","ATP5L","LOC100509635",
+			"CXCL6","ETFA","SACM1L","TOB1","GBE1","COMMD8","TMEM167A","ZMPSTE24","POMP",
+			"TUBB2A","CELA2A","SNRPG","COX6C","PCNA","MT1HL1","HSPA5","NDUFAB1","PGAM1",
+			"MFSD1","MYL12B","NDUFS6","SRP9","RPS21","MLLT11","EIF4A3","MICU2","LYPLA1",
+			"ROBO1","CHCHD2","HMGN1","OSTC","RYR3","NUDT9","ITGAV","RPL26L1","TMEM263",
+			"SRP14","NNMT","AIM1","C3","VCAM1","TUBA4A","GBP2","ALDH3A2","RPL34","NRIP3",
+			"MINPP1","MXRA5","NDUFA4","CDK2AP1","RPL22","RPL27","GNG10","CETN2","ATP2C1",
+			"RAB1A","RAP1B","TMEM14A","DECR1","UCHL3","TSPYL4","LINC00622","WBP5","TMA7",
+			"RRAGA","ERMP1","PSME2","ENOPH1","TGFBR3","GTF3C6","BZW1","LOC100508591","SEC61G",
+			"LRP11","PSMB4","DPY19L3","CUTA","TOMM5","COL5A2","MT1X","RPL41","NDUFB5","TAX1BP1",
+			"TMEM50A","GFPT2","AGL","RPL36A","RPL36AL","HSP90AA1","MT1F","HSD17B10","SEC13",
+			"C10orf32","TMEM133","LOC728825","RPS17","MEIS2","UBC","LINC00998","CYB561A3",
+			"UNC50","HIST1H2AC","APOO","PEG3","PSMB3","AADAC","RBBP7","PTTG1","RPS8","PORCN",
+			"SURF4","HSPE1","BET1","RPS7","HLA-DRB5","MIR22HG","ATP5G1","TDP2","KDELR2","TMED7",
+			"PSMC6","SRP19","GPR158","C1QBP","RPS18","DDX1","ANXA2","H3F3AP4","HIST1H1C","DNAJA1",
+			"LAPTM4A","PSMB5","PGRMC1","MRPL33","NME1","NPTX2","NDUFA8","TXNDC15","UBB","DNAJB11",
+			"PLGRKT","IFITM3","COX1","NIPSNAP3A","RPL24","PSMC1","SLC12A8","DAD1","IGDCC4","RPL32",
+			"C6orf211","TCEB1","NDUFAF1","NAA20","DLD","VBP1","CHCHD1","DBI","RPL23A","RPL21","VIMP",
+			"GBP3","PSMC2","C18orf32","NDUFA6","MSMO1","TIMM21","BMI1","GLIPR1","EZH2","C14orf119",
+			"UQCRH","SLC25A5","DHRS9","MT1H","OST4","HAPLN1","NID2","RPN2","TMEM181","PDHB","ATRAID",
+			"PSMD12","SKP1","ITGAE","NIT2","TCEAL8","NOP10","ATP5I","PSMA2","PSMA7","KIAA1462","CETN3",
+			"GALNT1","LOC100506748","RAN","ILF2","SUCLA2","P4HB","MAGEH1","GPX8","LINC00493","TNFAIP3",
+			"RAPGEF4","METTL23","DDX21","MRPL53","GLRX","TCEAL7","TST","IPO7","GCSHP5","HLA-DRB1","TRIAP1",
+			"SLC35B1","C4orf3","ABAT","ARCN1","RPL30","TUBB6","YBX1","RNF4","ENC1","PGRMC2","TAF9","TBC1D23",
+			"C1QTNF1-AS1","RRM2","JKAMP","CD59","RPL26","RPL10","PDIA3","HMGN2","OAT","DIRAS3","RPL7A","SLTM",
+			"GSKIP","TCEAL4","SLC2A10","TM2D3","CXCL1","TIMP1","SERINC5","MTCH2","HMGCR","GXYLT2","ADI1",
+			"FHL2","RPL3","MRPS33","NARS","FAM174A","NDUFC2","PITPNB","TEKT4P2","TMEM126A","TPRKB",
+			"TMEM69","PTX3","RCN2","HNRNPA3","MGST2","NRIP1","RPS27L","ETF1","GNG5","BIRC2","HADHB",
+			"SNX6","HSBP1","CLIC1","H3F3B","EIF2S1","C15orf48","PRDX6","TCEAL1","ATP6V0B","MLEC",
+			"GRPEL1","DPYSL2","CXCL8","SPCS3","SEC23B","NMI","TMEM208","EBNA1BP2","GSTA3","NAT1",
+			"IGSF11","FRG1","POLR2K","RNF11","IL7R","NCOA4","SEC11C","DUOXA2","FAM177A1","TSPAN12",
+			"PDIA4"],
+
 		}, 
 		action: 'search',
 		result_id: undefined,
@@ -518,68 +574,7 @@ var SigSimSearchForm = Backbone.View.extend({
 	},
 });
 
-//var ResultModalBtn = Backbone.View.extend({
-	// The button to toggle the modal of similarity search result
-//	defaults: {
-//		container: document.body,
-//		scatterPlot: Scatter3dView,
-//		result_id: undefined
-//	},
-	
-//	initialize: function(options){
-//		if (options === undefined) {options = {}}
-//		_.defaults(options, this.defaults)
-//		_.defaults(this, options)
 
-//		this.model = this.scatterPlot.model;
-
-//		this.listenTo(this.model, 'sync', this.render);
-
-//	},
-
-//	render: function(){
-		// set up the button
-//		this.button = $('<a id="modal-btn" class="btn btn-info">Show detailed results</a>');
-//		var modal_url = 'result/modal/' + this.result_id;
-
-//		this.button.click(function(e){
-//			e.preventDefault();
-//			$('#result-modal').modal('show')
-//			$(".modal-body").load(modal_url);
-//		});
-//		$(this.container).append(this.button);
-//	},
-
-//});
-
-// var ResultModal = Backbone.View.extend({
-// 	// Used for toggling the mouseEvents of the scatterPlot.
-// 	defaults: {
-// 		scatterPlot: Scatter3dView,
-// 	},
-
-// 	initialize: function(options){
-// 		if (options === undefined) {options = {}}
-// 		_.defaults(options, this.defaults)
-// 		_.defaults(this, options)
-
-// 		this.model = this.scatterPlot.model;
-// 		this.listenTo(this.model, 'sync', this.toggleScatterPlotMouseEvents);
-
-// 	},
-
-// 	toggleScatterPlotMouseEvents: function(){
-// 		this.$el = $('#result-modal');
-// 		var scatterPlot = this.scatterPlot;
-// 		this.$el.on('show.bs.modal', function(e){
-// 			scatterPlot.removeMouseEvents()
-// 		});
-// 		this.$el.on('hide.bs.modal', function(e){
-// 			scatterPlot.addMouseEvents()
-// 		});
-// 	},
-
-// });
 
 var Overlay = Backbone.View.extend({
 	// An overlay to display current status.

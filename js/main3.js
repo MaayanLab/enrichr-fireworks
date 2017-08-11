@@ -6,7 +6,7 @@ var sd = new ScatterData({
 	url: 'graph/0/cy',
 	textures: textures,
 })
-
+//container is set so that mouse hover in View is accurate when header is in place
 var container=document.getElementById('body')
 var width= container.clientWidth;
 var height=container.clientHeight;
@@ -28,7 +28,6 @@ var legend = new Legend({scatterPlot: sdv, h: window.innerHeight, container: con
 
 var controler = new Controler({scatterPlot: sdv, h: window.innerHeight/2, w: 200, container: container})
 
-//var search = new SearchSelectize({scatterPlot: sdv, container: "#controls"})
 
 
 var sigSimSearch = new SigSimSearchForm({scatterPlot: sdv, container: "#controls1"})
